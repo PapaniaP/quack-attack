@@ -35,6 +35,7 @@ public class StationaryPlayer : MonoBehaviour
         if (Input.GetMouseButtonDown(0)) // Left-click
         {
             Ray ray = playerCamera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
+
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
                 if (hit.collider.CompareTag("Target"))
