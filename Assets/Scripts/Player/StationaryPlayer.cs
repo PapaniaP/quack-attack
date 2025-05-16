@@ -51,7 +51,7 @@ public class StationaryPlayer : MonoBehaviour
                         }
                     }
 
-                    Destroy(hit.collider.gameObject);
+                    hit.collider.GetComponent<Target>().Hit();
                 }
                 else
                 {
