@@ -6,7 +6,8 @@ public class Target : MonoBehaviour
     public float lifetime = 5f;
     public float colorChangeThreshold = 1.5f;
 
-    public BoxCollider bounds; // Assign via Inspector
+    public GameObject boundsObject;
+    private BoxCollider bounds;
 
     private Vector3 velocity;
     private float timer;
@@ -18,17 +19,24 @@ public class Target : MonoBehaviour
         rend = GetComponent<Renderer>();
         originalColor = rend.material.color;
 
-        velocity = Random.onUnitSphere * moveSpeed;
+    float difficulty = GameManager.Instance != null ? GameManager.Instance.RunProgress : 0f;
+    float adjustedSpeed = Mathf.Lerp(1f, moveSpeed, difficulty); // starts at 1, ramps to moveSpeed
+    velocity = Random.onUnitSphere * adjustedSpeed;
+
+        if (boundsObject != null)
+        {
+            bounds = boundsObject.GetComponent<BoxCollider>();
+        }
 
         // Optional: random start position inside bounds
         if (bounds != null)
         {
-            Vector3 center = bounds.transform.position;
-            Vector3 size = bounds.size * 0.5f;
+            Vector3 center = bounds.bounds.center;
+            Vector3 extents = bounds.bounds.extents;
             transform.position = center + new Vector3(
-                Random.Range(-size.x, size.x),
-                Random.Range(-size.y, size.y),
-                Random.Range(-size.z, size.z)
+                Random.Range(-extents.x, extents.x),
+                Random.Range(-extents.y, extents.y),
+                Random.Range(-extents.z, extents.z)
             );
         }
     }
@@ -37,16 +45,20 @@ public class Target : MonoBehaviour
     {
         transform.position += velocity * Time.deltaTime;
 
-        // Bounce off bounds
+        // LSD-style redirect on bounds exit
         if (bounds != null && !bounds.bounds.Contains(transform.position))
         {
-            Vector3 pos = transform.position;
-            Vector3 min = bounds.bounds.min;
-            Vector3 max = bounds.bounds.max;
+            velocity = Random.onUnitSphere * moveSpeed;
 
-            if (pos.x < min.x || pos.x > max.x) velocity.x *= -1;
-            if (pos.y < min.y || pos.y > max.y) velocity.y *= -1;
-            if (pos.z < min.z || pos.z > max.z) velocity.z *= -1;
+            // Push the duck back inside the bounds slightly
+            Vector3 center = bounds.bounds.center;
+            Vector3 extents = bounds.bounds.extents;
+
+            transform.position = center + new Vector3(
+                Mathf.Clamp(transform.position.x - center.x, -extents.x * 0.95f, extents.x * 0.95f),
+                Mathf.Clamp(transform.position.y - center.y, -extents.y * 0.95f, extents.y * 0.95f),
+                Mathf.Clamp(transform.position.z - center.z, -extents.z * 0.95f, extents.z * 0.95f)
+            );
         }
 
         // Timer and color change

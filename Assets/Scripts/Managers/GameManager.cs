@@ -10,6 +10,13 @@ public class GameManager : MonoBehaviour
     public int highScore;
     public int combo;
 
+
+
+// Game timer
+    public float runDuration = 60f;  // total time of a run in seconds
+    private float runTimer;
+    public float RunProgress => Mathf.Clamp01(runTimer / runDuration);
+
     // // Combo system
     // public float comboResetTime = 3f;
     // private float comboTimer;
@@ -28,7 +35,21 @@ public class GameManager : MonoBehaviour
         else Destroy(gameObject);
     }
 
-    // private void Update()
+    private void Update()
+
+{
+    if (isGameActive)
+    {
+        runTimer += Time.deltaTime;
+
+        if (runTimer >= runDuration)
+        {
+            EndGame(success: true); // or false depending on your condition
+        }
+    }
+
+    // HandleComboTimer(); // (commented out, which is fine for now)
+}
     // {
     //     HandleComboTimer();
     // }
@@ -80,6 +101,7 @@ public class GameManager : MonoBehaviour
     {
         score = 0;
         combo = 0;
+        runTimer = 0f;
         SetGameState(GameState.Play);
     }
 
