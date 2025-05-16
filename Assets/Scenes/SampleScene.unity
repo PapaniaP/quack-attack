@@ -450,7 +450,7 @@ GameObject:
   m_Component:
   - component: {fileID: 606913815}
   - component: {fileID: 606913814}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: TargetBounds
   m_TagString: Untagged
   m_Icon: {fileID: 0}
