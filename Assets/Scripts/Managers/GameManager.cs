@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     public int combo;
 
     public TMPro.TextMeshProUGUI scoreText;
+    public TMPro.TextMeshProUGUI highScoreText;
 
     // Game timer
     public float runDuration = 60f;  // total time of a run in seconds
@@ -36,7 +37,6 @@ public class GameManager : MonoBehaviour
     }
 
     private void Update()
-
     {
         if (isGameActive)
         {
@@ -46,6 +46,12 @@ public class GameManager : MonoBehaviour
             {
                 EndGame(success: true); // or false depending on your condition
             }
+        }
+
+        // Check for R key press to restart game
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            RestartGameKeepHighScore();
         }
 
         // HandleComboTimer(); // (commented out, which is fine for now)
@@ -85,7 +91,11 @@ public class GameManager : MonoBehaviour
     {
         score += value;
         if (score > highScore)
+        {
             highScore = score;
+            if (highScoreText != null)
+                highScoreText.text = "High Score: " + highScore;
+        }
 
         if (scoreText != null)
             scoreText.text = "Score: " + score;
@@ -107,6 +117,8 @@ public class GameManager : MonoBehaviour
 
         if (scoreText != null)
             scoreText.text = "Score: 0";
+        if (highScoreText != null)
+            highScoreText.text = "High Score: " + highScore;
     }
 
     public void PauseGame()
@@ -129,7 +141,37 @@ public class GameManager : MonoBehaviour
 
     public void RestartGame()
     {
-        StartGame();
+        // Reset everything including high score
+        score = 0;
+        highScore = 0;
+        combo = 0;
+        SetGameState(GameState.Play);
+
+        if (scoreText != null)
+            scoreText.text = "Score: 0";
+        if (highScoreText != null)
+            highScoreText.text = "High Score: 0";
+    }
+
+    public void RestartGameKeepHighScore()
+    {
+        // Save the current high score
+        int savedHighScore = highScore;
+
+        // Reset game state
+        score = 0;
+        combo = 0;
+        runTimer = 0f;
+        SetGameState(GameState.Play);
+
+        // Restore high score
+        highScore = savedHighScore;
+
+        // Update UI
+        if (scoreText != null)
+            scoreText.text = "Score: 0";
+        if (highScoreText != null)
+            highScoreText.text = "High Score: " + highScore;
     }
 
     public void ExitGame()
