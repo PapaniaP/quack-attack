@@ -1,4 +1,4 @@
 using UnityEngine;
 public interface IComboEffect {
-    void OnComboReached(Player player, int comboCount, Vector3 lastHitPosition);
+    void OnComboReached(StationaryPlayer player, int comboCount, Vector3 lastHitPosition);
 }

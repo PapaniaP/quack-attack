@@ -3,7 +3,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "PowerUps/Effects/Ducktonium Detonator")]
 // This class is a reusable asset I can create in the editor. It knows how to react when a combo happens because it follows the IComboEffect rules.
 public class DucktoniumDetonatorEffect : ScriptableObject, IComboEffect {
-    public void OnComboReached(Player player, int comboCount, Vector3 lastHitPosition) {
+    public void OnComboReached(StationaryPlayer player, int comboCount, Vector3 lastHitPosition) {
         // Search through the player’s active power-ups and see if they have one called ‘Ducktonium Detonator’. If they do, give it to me.
         var powerUp = PowerUpManager.Instance.activePowerUps
             .Find(p => p.powerUpName == "Ducktonium Detonator");

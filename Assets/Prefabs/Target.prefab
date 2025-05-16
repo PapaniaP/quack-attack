@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3714310598845164381}
   - component: {fileID: 7819981862981651344}
   - component: {fileID: 7632976186770170245}
-  - component: {fileID: 5938223441065006935}
+  - component: {fileID: -8436901040420516676}
   m_Layer: 0
   m_Name: Target
   m_TagString: Target
@@ -125,7 +125,7 @@ MonoBehaviour:
   _data:
     _json: '{"declarations":{"Kind":"Object","collection":{"$content":[],"$version":"A"},"$version":"A"}}'
     _objectReferences: []
---- !u!114 &5938223441065006935
+--- !u!114 &-8436901040420516676
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -134,8 +134,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 7646236365653401954}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a93b582d0fb4c3448e7015021ec7627, type: 3}
+  m_Script: {fileID: 11500000, guid: 988bdc8b2d6c74f5ea4f0a9f6e85dc88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 0.1
-  moveRange: 1
+  moveSpeed: 3
+  lifetime: 5
+  colorChangeThreshold: 1.5
