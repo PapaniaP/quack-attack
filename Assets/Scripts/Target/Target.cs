@@ -80,6 +80,7 @@ public class Target : MonoBehaviour
     public void Hit()
     {
         Destroy(gameObject);
+        GameManager.Instance.AddPoints(10);
     }
 
     void Explode()

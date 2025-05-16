@@ -10,9 +10,9 @@ public class GameManager : MonoBehaviour
     public int highScore;
     public int combo;
 
+    public TMPro.TextMeshProUGUI scoreText;
 
-
-// Game timer
+    // Game timer
     public float runDuration = 60f;  // total time of a run in seconds
     private float runTimer;
     public float RunProgress => Mathf.Clamp01(runTimer / runDuration);
@@ -37,19 +37,19 @@ public class GameManager : MonoBehaviour
 
     private void Update()
 
-{
-    if (isGameActive)
     {
-        runTimer += Time.deltaTime;
-
-        if (runTimer >= runDuration)
+        if (isGameActive)
         {
-            EndGame(success: true); // or false depending on your condition
-        }
-    }
+            runTimer += Time.deltaTime;
 
-    // HandleComboTimer(); // (commented out, which is fine for now)
-}
+            if (runTimer >= runDuration)
+            {
+                EndGame(success: true); // or false depending on your condition
+            }
+        }
+
+        // HandleComboTimer(); // (commented out, which is fine for now)
+    }
     // {
     //     HandleComboTimer();
     // }
@@ -87,6 +87,9 @@ public class GameManager : MonoBehaviour
         if (score > highScore)
             highScore = score;
 
+        if (scoreText != null)
+            scoreText.text = "Score: " + score;
+
         Debug.Log($"[GameManager] Score: {score}, High Score: {highScore}");
     }
 
@@ -96,13 +99,14 @@ public class GameManager : MonoBehaviour
         previousState = currentState;
         currentState = state;
     }
-
     public void StartGame()
     {
         score = 0;
         combo = 0;
-        runTimer = 0f;
         SetGameState(GameState.Play);
+
+        if (scoreText != null)
+            scoreText.text = "Score: 0";
     }
 
     public void PauseGame()
