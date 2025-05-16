@@ -10,6 +10,8 @@ public class GameManager : MonoBehaviour
     public int highScore;
     public int combo;
 
+    public TMPro.TextMeshProUGUI scoreText;
+
     // // Combo system
     // public float comboResetTime = 3f;
     // private float comboTimer;
@@ -66,6 +68,9 @@ public class GameManager : MonoBehaviour
         if (score > highScore)
             highScore = score;
 
+        if (scoreText != null)
+            scoreText.text = "Score: " + score;
+
         Debug.Log($"[GameManager] Score: {score}, High Score: {highScore}");
     }
 
@@ -81,6 +86,9 @@ public class GameManager : MonoBehaviour
         score = 0;
         combo = 0;
         SetGameState(GameState.Play);
+
+        if (scoreText != null)
+            scoreText.text = "Score: 0";
     }
 
     public void PauseGame()
