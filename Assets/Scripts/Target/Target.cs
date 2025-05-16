@@ -19,9 +19,9 @@ public class Target : MonoBehaviour
         rend = GetComponent<Renderer>();
         originalColor = rend.material.color;
 
-    float difficulty = GameManager.Instance != null ? GameManager.Instance.RunProgress : 0f;
-    float adjustedSpeed = Mathf.Lerp(1f, moveSpeed, difficulty); // starts at 1, ramps to moveSpeed
-    velocity = Random.onUnitSphere * adjustedSpeed;
+        float difficulty = GameManager.Instance != null ? GameManager.Instance.RunProgress : 0f;
+        float adjustedSpeed = Mathf.Lerp(1f, moveSpeed, difficulty); // starts at 1, ramps to moveSpeed
+        velocity = Random.onUnitSphere * adjustedSpeed;
 
         if (boundsObject != null)
         {
