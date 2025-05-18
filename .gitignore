@@ -88,5 +88,10 @@ crashlytics-build.properties
 *.vscode
 .vscode/*
 .vscode
-.DS_StoreAssets/Snowconesolid Assets/
-Assets/Snowconesolid Assets.meta
+.DS_Store
+
+/Assets/Snowconesolid Assets/
+/Assets/Snowconesolid Assets.meta
+
+/[Aa]ssets/Snowconesolid Assets/
+/[Aa]ssets/Snowconesolid Assets.meta
