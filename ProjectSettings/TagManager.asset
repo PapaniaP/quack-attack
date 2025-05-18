@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 3
   tags:
   - Target
+  - DuckHead
+  - DuckBeak
+  - DuckBody
   layers:
   - Default
   - TransparentFX

@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "com.boxqkrtm.ide.cursor": "https://github.com/boxqkrtm/com.unity.ide.cursor.git",
-    "com.justinpbarnett.unity-mcp": "https://github.com/justinpbarnett/unity-mcp.git?path=/UnityMcpBridge",
     "com.unity.ai.navigation": "2.0.6",
     "com.unity.collab-proxy": "2.8.1",
     "com.unity.ide.rider": "3.0.31",

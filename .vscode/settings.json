@@ -57,6 +57,9 @@
     "Temp/": true
   },
   "dotnet.defaultSolution": "quack-attack.sln",
-  "editor.defaultFormatter": "ms-dotnettools.csharp",
-  "editor.formatOnSave": true
+  "editor.defaultFormatter": null,
+  "editor.formatOnSave": true,
+  "[csharp]": {
+    "editor.defaultFormatter": "ms-dotnettools.csharp"
+  }
 }

@@ -38,25 +38,45 @@ public class StationaryPlayer : MonoBehaviour
 
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
-                if (hit.collider.CompareTag("Target"))
+                float scoreMultiplier = 1f;
+
+                // Determine hit zone by tag
+                if (hit.collider.CompareTag("DuckBeak"))
                 {
-                    Debug.Log("🎯 Hit: " + hit.collider.name);
-                    GameManager.Instance.AddCombo();
-
-                    foreach (var powerUp in PowerUpManager.Instance.activePowerUps)
-                    {
-                        if (powerUp.effect is IComboEffect comboEffect)
-                        {
-                            comboEffect.OnComboReached(this, GameManager.Instance.combo, hit.collider.transform.position);
-                        }
-                    }
-
-                    hit.collider.GetComponent<Target>().Hit();
+                    scoreMultiplier = 3f;
+                    Debug.Log("🟧 BEAK SHOT! Triple points!");
+                }
+                else if (hit.collider.CompareTag("DuckHead"))
+                {
+                    scoreMultiplier = 2f;
+                    Debug.Log("🟨 HEADSHOT! Double points!");
+                }
+                else if (hit.collider.CompareTag("DuckBody"))
+                {
+                    scoreMultiplier = 1f;
+                    Debug.Log("🟩 Body shot");
                 }
                 else
                 {
                     GameManager.Instance.ResetCombo();
-                    Debug.Log("Missed something else.");
+                    Debug.Log("Missed, reset combo.");
+                    return;
+                }
+
+                GameManager.Instance.AddCombo();
+
+                foreach (var powerUp in PowerUpManager.Instance.activePowerUps)
+                {
+                    if (powerUp.effect is IComboEffect comboEffect)
+                    {
+                        comboEffect.OnComboReached(this, GameManager.Instance.combo, hit.collider.transform.position);
+                    }
+                }
+
+                Target target = hit.collider.GetComponentInParent<Target>();
+                if (target != null)
+                {
+                    target.Hit(scoreMultiplier);
                 }
             }
             else
