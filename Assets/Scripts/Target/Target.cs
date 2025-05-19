@@ -23,6 +23,9 @@ public class Target : MonoBehaviour
     private Color originalColor;
     private Vector3 originalScale;
 
+    [Header("Hit Effect")]
+    public GameObject HitExplosion; // Public variable to hold your smoke prefab
+
     void Start()
     {
         rend = GetComponentInChildren<Renderer>();
@@ -32,9 +35,9 @@ public class Target : MonoBehaviour
         float difficulty = GameManager.Instance != null ? GameManager.Instance.RunProgress : 0f;
         float adjustedSpeed = Mathf.Lerp(1f, moveSpeed, difficulty); // starts at 1, ramps to moveSpeed
         Vector3 biasedDirection = new Vector3(
-            Random.Range(-1f, 1f),     // Full X range (left-right)
-            Random.Range(-0.5f, 0.5f), // Less Y movement (up-down)
-            Random.Range(-0.2f, 0.2f)  // Tiny Z movement (depth)
+            Random.Range(-1f, 1f),       // Full X range (left-right)
+            Random.Range(-0.5f, 0.5f),   // Less Y movement (up-down)
+            Random.Range(-0.2f, 0.2f)    // Tiny Z movement (depth)
         ).normalized;
 
         float randomSpeed = Random.Range(-1f * moveSpeed, 2f * moveSpeed);
@@ -148,6 +151,12 @@ public class Target : MonoBehaviour
 
         GameManager.Instance.AddPoints(finalPoints);
         Debug.Log($"[Target] Hit! Multiplier: {multiplier}, Points: {finalPoints}");
+
+        // Instantiate the hit explosion prefab at the target's position and rotation
+        if (HitExplosion != null)
+        {
+            Instantiate(HitExplosion, transform.position, transform.rotation);
+        }
 
         Destroy(gameObject);
     }
