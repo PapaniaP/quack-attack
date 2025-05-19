@@ -24,6 +24,13 @@ public class SpawnManager : MonoBehaviour
         {
             Debug.LogError("SpawnManager: boundsObject not assigned.");
         }
+
+        // Spawn initial targets
+        int initialCount = GetAllowedTargetCount();
+        for (int i = 0; i < initialCount; i++)
+        {
+            SpawnTarget();
+        }
     }
 
     void Update()

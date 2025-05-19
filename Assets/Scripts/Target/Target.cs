@@ -37,7 +37,8 @@ public class Target : MonoBehaviour
             Random.Range(-0.2f, 0.2f)  // Tiny Z movement (depth)
         ).normalized;
 
-        velocity = biasedDirection * 1f; // or * moveSpeed if you're scaling later
+        float randomSpeed = Random.Range(-1f * moveSpeed, 2f * moveSpeed);
+        velocity = biasedDirection * randomSpeed;
 
         if (boundsObject != null)
         {
