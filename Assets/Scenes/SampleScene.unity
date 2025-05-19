@@ -1715,6 +1715,7 @@ GameObject:
   - component: {fileID: 2008418159}
   - component: {fileID: 2008418158}
   - component: {fileID: 2008418157}
+  - component: {fileID: 2008418160}
   m_Layer: 0
   m_Name: Player Camera
   m_TagString: MainCamera
@@ -1840,6 +1841,21 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!114 &2008418160
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008418155}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9fd32ca5b981f44fa3fba945bb6077d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shakeDuration: 0.15
+  shakeMagnitude: 0.1
+  dampingSpeed: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

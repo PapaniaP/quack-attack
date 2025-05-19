@@ -22,6 +22,7 @@ public class Target : MonoBehaviour
     private float timer;
     private Color originalColor;
     private Vector3 originalScale;
+    private CameraShake cameraShaker;
 
     [Header("Hit Effect")]
     public GameObject HitExplosion; // Public variable to hold your smoke prefab
@@ -31,6 +32,18 @@ public class Target : MonoBehaviour
         rend = GetComponentInChildren<Renderer>();
         originalColor = rend.material.color;
         originalScale = transform.localScale;
+
+        // --- ADD THIS BLOCK OF CODE HERE ---
+        Camera mainCamera = Camera.main; // This finds the camera tagged as "MainCamera" in your scene.
+        if (mainCamera != null)
+        {
+            cameraShaker = mainCamera.GetComponent<CameraShake>(); // This gets the CameraShake script attached to the Main Camera.
+        }
+        else
+        {
+            Debug.LogError("No Main Camera found in the scene! Make sure your camera is tagged as 'MainCamera'.");
+        }
+        // --- END OF CODE BLOCK ---
 
         float difficulty = GameManager.Instance != null ? GameManager.Instance.RunProgress : 0f;
         float adjustedSpeed = Mathf.Lerp(1f, moveSpeed, difficulty); // starts at 1, ramps to moveSpeed
@@ -152,7 +165,13 @@ public class Target : MonoBehaviour
         GameManager.Instance.AddPoints(finalPoints);
         Debug.Log($"[Target] Hit! Multiplier: {multiplier}, Points: {finalPoints}");
 
-        // Instantiate the hit explosion prefab at the target's position and rotation
+        // Trigger camera shake
+        if (cameraShaker != null)
+        {
+            cameraShaker.Shake();
+        }
+
+        // Instantiate the hit explosion prefab
         if (HitExplosion != null)
         {
             Instantiate(HitExplosion, transform.position, transform.rotation);
