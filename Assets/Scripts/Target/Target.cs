@@ -155,7 +155,7 @@ public class Target : MonoBehaviour
     void Explode()
     {
         Debug.Log("💥 Duck exploded!");
-        // GameManager.Instance.RemoveLife();
+        GameManager.Instance.RemoveLife();
         Destroy(gameObject);
     }
 }

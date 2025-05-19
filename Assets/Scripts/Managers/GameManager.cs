@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,6 +13,17 @@ public class GameManager : MonoBehaviour
 
     public TMPro.TextMeshProUGUI scoreText;
     public TMPro.TextMeshProUGUI highScoreText;
+    public TMPro.TextMeshProUGUI timerText;
+
+    // Lives system
+    public int maxLives = 5;
+    private int currentLives;
+    public int CurrentLives => currentLives;
+
+    [Header("Lives UI")]
+    public GameObject heartPrefab;  // Prefab for a single heart image
+    public Transform heartsContainer;  // Parent transform to hold all hearts
+    private List<GameObject> heartImages = new List<GameObject>();  // List to track heart GameObjects
 
     // Game timer
     public float runDuration = 60f;  // total time of a run in seconds
@@ -34,6 +46,31 @@ public class GameManager : MonoBehaviour
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        // Initialize lives
+        currentLives = maxLives;
+        InitializeHearts();
+    }
+
+    private void InitializeHearts()
+    {
+        // Clear any existing hearts
+        foreach (var heart in heartImages)
+        {
+            if (heart != null)
+                Destroy(heart);
+        }
+        heartImages.Clear();
+
+        // Create new hearts
+        for (int i = 0; i < maxLives; i++)
+        {
+            if (heartPrefab != null && heartsContainer != null)
+            {
+                GameObject heart = Instantiate(heartPrefab, heartsContainer);
+                heartImages.Add(heart);
+            }
+        }
     }
 
     private void Update()
@@ -41,6 +78,13 @@ public class GameManager : MonoBehaviour
         if (isGameActive)
         {
             runTimer += Time.deltaTime;
+
+            // Update timer display
+            if (timerText != null)
+            {
+                float remainingTime = Mathf.Max(0, runDuration - runTimer);
+                timerText.text = $"Time: {Mathf.CeilToInt(remainingTime)}s";
+            }
 
             if (runTimer >= runDuration)
             {
@@ -113,12 +157,18 @@ public class GameManager : MonoBehaviour
     {
         score = 0;
         combo = 0;
+        currentLives = maxLives;
+        runTimer = 0f;
         SetGameState(GameState.Play);
 
         if (scoreText != null)
             scoreText.text = "Score: 0";
         if (highScoreText != null)
             highScoreText.text = "High Score: " + highScore;
+        if (timerText != null)
+            timerText.text = $"Time: {Mathf.CeilToInt(runDuration)}s";
+
+        InitializeHearts();  // Reset hearts display
     }
 
     public void PauseGame()
@@ -145,12 +195,18 @@ public class GameManager : MonoBehaviour
         score = 0;
         highScore = 0;
         combo = 0;
+        currentLives = maxLives;
+        runTimer = 0f;
         SetGameState(GameState.Play);
 
         if (scoreText != null)
             scoreText.text = "Score: 0";
         if (highScoreText != null)
             highScoreText.text = "High Score: 0";
+        if (timerText != null)
+            timerText.text = $"Time: {Mathf.CeilToInt(runDuration)}s";
+
+        InitializeHearts();  // Reset hearts display
     }
 
     public void RestartGameKeepHighScore()
@@ -161,6 +217,7 @@ public class GameManager : MonoBehaviour
         // Reset game state
         score = 0;
         combo = 0;
+        currentLives = maxLives;
         runTimer = 0f;
         SetGameState(GameState.Play);
 
@@ -172,11 +229,43 @@ public class GameManager : MonoBehaviour
             scoreText.text = "Score: 0";
         if (highScoreText != null)
             highScoreText.text = "High Score: " + highScore;
+        if (timerText != null)
+            timerText.text = $"Time: {Mathf.CeilToInt(runDuration)}s";
+
+        InitializeHearts();  // Reset hearts display
     }
 
     public void ExitGame()
     {
         Debug.Log("Exiting game...");
         Application.Quit();
+    }
+
+    // Lives methods
+    public void RemoveLife()
+    {
+        if (!isGameActive) return;
+
+        currentLives--;
+        UpdateLivesDisplay();
+
+        Debug.Log($"[GameManager] Lives remaining: {currentLives}");
+
+        if (currentLives <= 0)
+        {
+            EndGame(success: false);
+        }
+    }
+
+    private void UpdateLivesDisplay()
+    {
+        // Update heart images visibility based on current lives
+        for (int i = 0; i < heartImages.Count; i++)
+        {
+            if (heartImages[i] != null)
+            {
+                heartImages[i].SetActive(i < currentLives);
+            }
+        }
     }
 }
