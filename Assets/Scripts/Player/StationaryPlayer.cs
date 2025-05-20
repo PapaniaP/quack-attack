@@ -10,6 +10,7 @@ public class StationaryPlayer : MonoBehaviour
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
+        transform.rotation = Quaternion.Euler(0f, 90f, 0f);
     }
 
     void Update()
