@@ -10,7 +10,29 @@ public class GameManager : MonoBehaviour
     public int highScore;
     public int combo;
 
+    [Header("UI References")]
     public TMPro.TextMeshProUGUI scoreText;
+<<<<<<< Updated upstream
+=======
+    public TMPro.TextMeshProUGUI highScoreText;
+    public TMPro.TextMeshProUGUI timerText;
+    public GameObject hudCanvas;  // Reference to the HUD Canvas
+
+    // Lives system
+    public int maxLives = 5;
+    private int currentLives;
+    public int CurrentLives => currentLives;
+
+    [Header("Lives UI")]
+    public GameObject heartPrefab;  // Prefab for a single heart image
+    public Transform heartsContainer;  // Parent transform to hold all hearts
+    private List<GameObject> heartImages = new List<GameObject>();  // List to track heart GameObjects
+
+    // Game timer
+    public float runDuration = 60f;  // total time of a run in seconds
+    private float runTimer;
+    public float RunProgress => Mathf.Clamp01(runTimer / runDuration);
+>>>>>>> Stashed changes
 
     // // Combo system
     // public float comboResetTime = 3f;
@@ -67,6 +89,18 @@ public class GameManager : MonoBehaviour
         score += value;
         if (score > highScore)
             highScore = score;
+<<<<<<< Updated upstream
+=======
+            if (highScoreText != null)
+                highScoreText.text = "High Score: " + highScore;
+
+            // Update high score on start screen if it exists
+            if (startScreen != null)
+            {
+                startScreen.UpdateHighScoreDisplay();
+            }
+        }
+>>>>>>> Stashed changes
 
         if (scoreText != null)
             scoreText.text = "Score: " + score;
@@ -79,6 +113,37 @@ public class GameManager : MonoBehaviour
     {
         previousState = currentState;
         currentState = state;
+<<<<<<< Updated upstream
+=======
+
+        // Handle cursor and UI based on game state
+        switch (state)
+        {
+            case GameState.StartScreen:
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+                if (hudCanvas != null) hudCanvas.SetActive(false);
+                if (startScreen != null) startScreen.UpdateStatusMessage(state);
+                break;
+            case GameState.Play:
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Locked;
+                if (hudCanvas != null) hudCanvas.SetActive(true);
+                break;
+            case GameState.Pause:
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+                if (hudCanvas != null) hudCanvas.SetActive(true);
+                if (startScreen != null) startScreen.UpdateStatusMessage(state);
+                break;
+            case GameState.End:
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+                if (hudCanvas != null) hudCanvas.SetActive(false);
+                if (startScreen != null) startScreen.UpdateStatusMessage(state, runTimer >= runDuration);
+                break;
+        }
+>>>>>>> Stashed changes
     }
 
     public void StartGame()
@@ -107,6 +172,21 @@ public class GameManager : MonoBehaviour
     {
         SetGameState(GameState.End);
         Debug.Log(success ? "Game Over – Success!" : "Game Over – Fail!");
+<<<<<<< Updated upstream
+=======
+
+        // Show the start screen using the StartScreen component
+        if (startScreen != null)
+        {
+            startScreen.ShowStartScreen();
+            startScreen.UpdateScoreDisplays();  // Update both scores
+            startScreen.UpdateStatusMessage(GameState.End, success);
+        }
+        else
+        {
+            Debug.LogWarning("[GameManager] StartScreen component not found, cannot show start screen");
+        }
+>>>>>>> Stashed changes
     }
 
     public void RestartGame()
