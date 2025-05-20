@@ -10,6 +10,8 @@ public class StartScreen : MonoBehaviour
     public Button quitButton;
     public TextMeshProUGUI titleText;
     public TextMeshProUGUI highScoreText;
+    public TextMeshProUGUI currentScoreText;  // For showing current score
+    public TextMeshProUGUI statusMessageText;  // For showing game state messages
 
     private void Start()
     {
@@ -23,8 +25,11 @@ public class StartScreen : MonoBehaviour
         if (quitButton != null)
             quitButton.onClick.AddListener(OnQuitButtonClicked);
 
-        // Update high score display
-        UpdateHighScoreDisplay();
+        // Update score displays
+        UpdateScoreDisplays();
+
+        // Set initial status message
+        UpdateStatusMessage("Let's get it started!");
 
         // Ensure cursor is visible during start screen
         Cursor.visible = true;
@@ -45,6 +50,11 @@ public class StartScreen : MonoBehaviour
         if (startScreenPanel != null)
         {
             startScreenPanel.SetActive(true);
+            if (statusMessageText != null)
+            {
+                statusMessageText.gameObject.SetActive(true);
+            }
+            UpdateScoreDisplays();  // Update both scores when showing start screen
             Debug.Log("[StartScreen] Start screen panel shown");
         }
         else
@@ -53,9 +63,8 @@ public class StartScreen : MonoBehaviour
         }
     }
 
-    private void OnStartButtonClicked()
+    public void HideStartScreen()
     {
-        Debug.Log("[StartScreen] Attempting to hide start screen panel");
         if (startScreenPanel != null)
         {
             startScreenPanel.SetActive(false);
@@ -65,19 +74,71 @@ public class StartScreen : MonoBehaviour
         {
             Debug.LogError("[StartScreen] Start screen panel reference is null!");
         }
+    }
 
-        // Let GameManager handle cursor state through SetGameState
+    public void UpdateScoreDisplays()
+    {
+        UpdateHighScoreDisplay();
+        UpdateCurrentScoreDisplay();
+    }
+
+    private void UpdateHighScoreDisplay()
+    {
+        if (highScoreText != null)
+        {
+            highScoreText.text = $"High Score: {GameManager.Instance.highScore}";
+        }
+    }
+
+    public void UpdateCurrentScoreDisplay()
+    {
+        if (currentScoreText != null)
+        {
+            currentScoreText.text = $"Score: {GameManager.Instance.score}";
+        }
+    }
+
+    public void UpdateStatusMessage(string message)
+    {
+        if (statusMessageText != null)
+        {
+            statusMessageText.text = message;
+        }
+    }
+
+    public void UpdateStatusMessage(GameManager.GameState state, bool success = false)
+    {
+        if (statusMessageText == null) return;
+
+        switch (state)
+        {
+            case GameManager.GameState.StartScreen:
+                statusMessageText.text = "Let's get it started!";
+                break;
+            case GameManager.GameState.Pause:
+                statusMessageText.text = "Your game is paused";
+                break;
+            case GameManager.GameState.End:
+                if (success)
+                {
+                    statusMessageText.text = "Congratulations!";
+                }
+                else
+                {
+                    statusMessageText.text = "Game Over!";
+                }
+                break;
+        }
+    }
+
+    private void OnStartButtonClicked()
+    {
+        // Let GameManager handle the visibility through SetGameState
         GameManager.Instance.StartGame();
     }
 
     private void OnQuitButtonClicked()
     {
         GameManager.Instance.ExitGame();
-    }
-
-    private void UpdateHighScoreDisplay()
-    {
-        if (highScoreText != null)
-            highScoreText.text = $"High Score: {GameManager.Instance.highScore}";
     }
 }

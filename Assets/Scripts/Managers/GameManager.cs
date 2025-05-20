@@ -11,9 +11,11 @@ public class GameManager : MonoBehaviour
     public int highScore;
     public int combo;
 
+    [Header("UI References")]
     public TMPro.TextMeshProUGUI scoreText;
     public TMPro.TextMeshProUGUI highScoreText;
     public TMPro.TextMeshProUGUI timerText;
+    public GameObject hudCanvas;  // Reference to the HUD Canvas
 
     // Lives system
     public int maxLives = 5;
@@ -166,6 +168,12 @@ public class GameManager : MonoBehaviour
             highScore = score;
             if (highScoreText != null)
                 highScoreText.text = "High Score: " + highScore;
+
+            // Update high score on start screen if it exists
+            if (startScreen != null)
+            {
+                startScreen.UpdateScoreDisplays();
+            }
         }
 
         if (scoreText != null)
@@ -180,24 +188,44 @@ public class GameManager : MonoBehaviour
         previousState = currentState;
         currentState = state;
 
-        // Handle cursor based on game state
+        // Handle cursor and UI based on game state
         switch (state)
         {
             case GameState.StartScreen:
                 Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;
+                if (hudCanvas != null) hudCanvas.SetActive(false);  // Hide HUD
+                if (startScreen != null)
+                {
+                    startScreen.ShowStartScreen();
+                    startScreen.UpdateStatusMessage(state);
+                }
                 break;
             case GameState.Play:
                 Cursor.visible = false;
                 Cursor.lockState = CursorLockMode.Locked;
+                if (hudCanvas != null) hudCanvas.SetActive(true);   // Show HUD
+                if (startScreen != null) startScreen.HideStartScreen();
                 break;
             case GameState.Pause:
                 Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;
+                if (hudCanvas != null) hudCanvas.SetActive(true);   // Keep HUD visible
+                if (startScreen != null)
+                {
+                    startScreen.ShowStartScreen();
+                    startScreen.UpdateStatusMessage(state);
+                }
                 break;
             case GameState.End:
                 Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;
+                if (hudCanvas != null) hudCanvas.SetActive(false);  // Hide HUD
+                if (startScreen != null)
+                {
+                    startScreen.ShowStartScreen();
+                    startScreen.UpdateStatusMessage(state, runTimer >= runDuration);
+                }
                 break;
         }
     }
@@ -247,6 +275,8 @@ public class GameManager : MonoBehaviour
         if (startScreen != null)
         {
             startScreen.ShowStartScreen();
+            startScreen.UpdateScoreDisplays();  // Update both scores
+            startScreen.UpdateStatusMessage(GameState.End, success);
         }
         else
         {
