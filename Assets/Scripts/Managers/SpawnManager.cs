@@ -80,4 +80,24 @@ public class SpawnManager : MonoBehaviour
         float t = GameManager.Instance.RunProgress; // 0 to 1 over time
         return Mathf.RoundToInt(Mathf.Lerp(minTargets, maxTargets, t));
     }
+
+    public void ResetAndSpawn()
+    {
+        // Clear existing targets
+        GameObject[] existingTargets = GameObject.FindGameObjectsWithTag("Target");
+        foreach (GameObject target in existingTargets)
+        {
+            Destroy(target);
+        }
+
+        // Reset spawn timer
+        spawnTimer = 0f;
+
+        // Spawn initial targets
+        int initialCount = GetAllowedTargetCount();
+        for (int i = 0; i < initialCount; i++)
+        {
+            SpawnTarget();
+        }
+    }
 }

@@ -35,12 +35,17 @@ public class GameManager : MonoBehaviour
     // private float comboTimer;
 
     // Game state
-    public enum GameState { Play, Pause, End }
-    public GameState currentState = GameState.Play;
+    public enum GameState { StartScreen, Play, Pause, End }
+    public GameState currentState = GameState.StartScreen;
     private GameState previousState;
     public bool isPaused => currentState == GameState.Pause;
     public bool isGameActive => currentState == GameState.Play;
     public bool isGameOver => currentState == GameState.End;
+    public bool isStartScreen => currentState == GameState.StartScreen;
+
+    // Add a reference to the StartScreen
+    private StartScreen startScreen;
+    private SpawnManager spawnManager;
 
     private void Awake()
     {
@@ -50,6 +55,28 @@ public class GameManager : MonoBehaviour
         // Initialize lives
         currentLives = maxLives;
         InitializeHearts();
+
+        // Find the StartScreen component
+        startScreen = FindAnyObjectByType<StartScreen>();
+        if (startScreen == null)
+        {
+            Debug.LogWarning("[GameManager] Could not find StartScreen component in scene");
+        }
+
+        // Find the SpawnManager
+        spawnManager = FindAnyObjectByType<SpawnManager>();
+        if (spawnManager == null)
+        {
+            Debug.LogWarning("[GameManager] Could not find SpawnManager in scene");
+        }
+
+        // Start in the start screen state
+        SetGameState(GameState.StartScreen);
+        Time.timeScale = 0f; // Pause the game until start
+
+        // Show cursor during start screen
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
     }
 
     private void InitializeHearts()
@@ -152,6 +179,27 @@ public class GameManager : MonoBehaviour
     {
         previousState = currentState;
         currentState = state;
+
+        // Handle cursor based on game state
+        switch (state)
+        {
+            case GameState.StartScreen:
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+                break;
+            case GameState.Play:
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Locked;
+                break;
+            case GameState.Pause:
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+                break;
+            case GameState.End:
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+                break;
+        }
     }
     public void StartGame()
     {
@@ -160,6 +208,13 @@ public class GameManager : MonoBehaviour
         currentLives = maxLives;
         runTimer = 0f;
         SetGameState(GameState.Play);
+        Time.timeScale = 1f; // Resume game time
+
+        // Reset and spawn new targets
+        if (spawnManager != null)
+        {
+            spawnManager.ResetAndSpawn();
+        }
 
         if (scoreText != null)
             scoreText.text = "Score: 0";
@@ -187,6 +242,16 @@ public class GameManager : MonoBehaviour
     {
         SetGameState(GameState.End);
         Debug.Log(success ? "Game Over – Success!" : "Game Over – Fail!");
+
+        // Show the start screen using the StartScreen component
+        if (startScreen != null)
+        {
+            startScreen.ShowStartScreen();
+        }
+        else
+        {
+            Debug.LogWarning("[GameManager] StartScreen component not found, cannot show start screen");
+        }
     }
 
     public void RestartGame()

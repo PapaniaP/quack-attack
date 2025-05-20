@@ -9,13 +9,17 @@ public class StationaryPlayer : MonoBehaviour
 
     void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
+        // Remove cursor lock from here - GameManager will handle it
     }
 
     void Update()
     {
-        HandleMouseLook();
-        HandleShoot();
+        // Only handle mouse look and shooting when game is active
+        if (GameManager.Instance.isGameActive)
+        {
+            HandleMouseLook();
+            HandleShoot();
+        }
     }
 
     void HandleMouseLook()
