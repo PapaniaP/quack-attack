@@ -10,6 +10,8 @@ public class StationaryPlayer : MonoBehaviour
     void Start()
     {
         // Remove cursor lock from here - GameManager will handle it
+        transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+
 
     }
 
