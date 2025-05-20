@@ -274,6 +274,7 @@ MonoBehaviour:
   pulseMaxScale: 1.001
   pulseSpeed: 1
   boundsObject: {fileID: 0}
+  HitExplosion: {fileID: 9092091760150505607, guid: b79b8d5676746d94b8540a4dd5b40387, type: 3}
 --- !u!1 &6249795595363920738
 GameObject:
   m_ObjectHideFlags: 0

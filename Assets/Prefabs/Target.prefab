@@ -137,6 +137,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 988bdc8b2d6c74f5ea4f0a9f6e85dc88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rend: {fileID: 0}
   moveSpeed: 3
   lifetime: 5
   colorChangeThreshold: 1.5
+  pulseMinScale: 0.999
+  pulseMaxScale: 1.001
+  pulseSpeed: 1
+  HitExplosion: {fileID: 9092091760150505607, guid: b79b8d5676746d94b8540a4dd5b40387, type: 3}
+  boundsObject: {fileID: 0}
