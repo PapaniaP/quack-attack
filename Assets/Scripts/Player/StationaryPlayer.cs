@@ -10,6 +10,7 @@ public class StationaryPlayer : MonoBehaviour
     void Start()
     {
         // Remove cursor lock from here - GameManager will handle it
+
     }
 
     void Update()
