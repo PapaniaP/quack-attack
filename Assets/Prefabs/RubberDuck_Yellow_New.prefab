@@ -267,7 +267,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rend: {fileID: 7015041781215371613}
-  moveSpeed: 3
+  moveSpeed: 2
   lifetime: 10
   colorChangeThreshold: 1.5
   pulseMinScale: 0.999

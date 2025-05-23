@@ -11,8 +11,6 @@ public class StationaryPlayer : MonoBehaviour
     {
         // Remove cursor lock from here - GameManager will handle it
         transform.rotation = Quaternion.Euler(0f, 90f, 0f);
-
-
     }
 
     void Update()
@@ -65,20 +63,31 @@ public class StationaryPlayer : MonoBehaviour
                 }
                 else
                 {
-                    GameManager.Instance.ResetCombo();
-                    Debug.Log("Missed, reset combo.");
+                    bool forgiven = false;
+
+                    foreach (var effect in PowerUpManager.Instance.missForgivenessEffects)
+                    {
+                        if (effect.OnMiss())
+                        {
+                            forgiven = true;
+                            Debug.Log("[OopsieShield] Miss was forgiven.");
+                            break;
+                        }
+                    }
+
+                    if (!forgiven)
+                    {
+                        GameManager.Instance.ResetCombo();
+                        Debug.Log("Missed, reset combo.");
+                    }
+
                     return;
                 }
 
                 GameManager.Instance.AddCombo();
 
-                foreach (var powerUp in PowerUpManager.Instance.activePowerUps)
-                {
-                    if (powerUp.effect is IComboEffect comboEffect)
-                    {
-                        comboEffect.OnComboReached(this, GameManager.Instance.combo, hit.collider.transform.position);
-                    }
-                }
+
+                PowerUpManager.Instance.TriggerComboEffects(hit.collider.transform.position, GameManager.Instance.combo);
 
                 Target target = hit.collider.GetComponentInParent<Target>();
                 if (target != null)

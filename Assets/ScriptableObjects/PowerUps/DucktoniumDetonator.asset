@@ -9,13 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 54f708d57e8024cd1be6f825be215910, type: 3}
-  m_Name: DucktoniumDetonator_PowerUp
+  m_Script: {fileID: 11500000, guid: fb65e1b03fd8d4dc381022af6b12eb7c, type: 3}
+  m_Name: DucktoniumDetonator
   m_EditorClassIdentifier: 
   powerUpName: Ducktonium Detonator
-  description: 'On combo streak, the next duck killed triggers an AoE explosion. '
+  description: On combo streak, the next duck killed triggers an AoE explosion.
   icon: {fileID: 0}
-  type: 0
-  stackable: 1
+  upgradeable: 1
   level: 1
-  effect: {fileID: 11400000, guid: 41038d2e0365244c78cea14545d014e4, type: 2}
+  effectType: 1

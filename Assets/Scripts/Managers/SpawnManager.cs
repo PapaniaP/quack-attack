@@ -72,6 +72,12 @@ public class SpawnManager : MonoBehaviour
         if (targetScript != null)
         {
             targetScript.boundsObject = boundsObject;
+
+            // Apply spawn effects (like Duck Dilation)
+            foreach (var effect in PowerUpManager.Instance.spawnEffects)
+            {
+                effect.OnTargetSpawned(targetScript);
+            }
         }
     }
 
