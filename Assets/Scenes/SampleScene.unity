@@ -3482,9 +3482,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9fd32ca5b981f44fa3fba945bb6077d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shakeDuration: 0.15
-  shakeMagnitude: 0.1
-  dampingSpeed: 1
+  defaultShakeDuration: 0.15
+  defaultShakeMagnitude: 0.1
+  defaultDampingSpeed: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

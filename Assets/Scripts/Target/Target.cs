@@ -22,7 +22,9 @@ public class Target : MonoBehaviour
     private float timer;
     private Color originalColor;
     private Vector3 originalScale;
-    private CameraShake cameraShaker;
+
+    // Remove the CameraShake cameraShaker field, as we'll use the static Instance
+    // private CameraShake cameraShaker;
 
     [Header("Hit Effect")]
     public GameObject HitExplosion; // Public variable to hold your smoke prefab
@@ -33,24 +35,24 @@ public class Target : MonoBehaviour
         originalColor = rend.material.color;
         originalScale = transform.localScale;
 
-        // --- ADD THIS BLOCK OF CODE HERE ---
-        Camera mainCamera = Camera.main; // This finds the camera tagged as "MainCamera" in your scene.
-        if (mainCamera != null)
-        {
-            cameraShaker = mainCamera.GetComponent<CameraShake>(); // This gets the CameraShake script attached to the Main Camera.
-        }
-        else
-        {
-            Debug.LogError("No Main Camera found in the scene! Make sure your camera is tagged as 'MainCamera'.");
-        }
-        // --- END OF CODE BLOCK ---
+        // --- REMOVE THIS BLOCK OF CODE ---
+        // Camera mainCamera = Camera.main;
+        // if (mainCamera != null)
+        // {
+        //     cameraShaker = mainCamera.GetComponent<CameraShake>();
+        // }
+        // else
+        // {
+        //     Debug.LogError("No Main Camera found in the scene! Make sure your camera is tagged as 'MainCamera'.");
+        // }
+        // --- END OF REMOVED CODE BLOCK ---
 
         float difficulty = GameManager.Instance != null ? GameManager.Instance.RunProgress : 0f;
         float adjustedSpeed = Mathf.Lerp(1f, moveSpeed, difficulty); // starts at 1, ramps to moveSpeed
         Vector3 biasedDirection = new Vector3(
-            Random.Range(-1f, 1f),       // Full X range (left-right)
-            Random.Range(-0.5f, 0.5f),   // Less Y movement (up-down)
-            Random.Range(-0.2f, 0.2f)    // Tiny Z movement (depth)
+            Random.Range(-1f, 1f),      // Full X range (left-right)
+            Random.Range(-0.5f, 0.5f),  // Less Y movement (up-down)
+            Random.Range(-0.2f, 0.2f)   // Tiny Z movement (depth)
         ).normalized;
 
         float randomSpeed = Random.Range(-1f * moveSpeed, 2f * moveSpeed);
@@ -165,11 +167,16 @@ public class Target : MonoBehaviour
         GameManager.Instance.AddPoints(finalPoints);
         Debug.Log($"[Target] Hit! Multiplier: {multiplier}, Points: {finalPoints}");
 
-        // Trigger camera shake
-        if (cameraShaker != null)
+        // Trigger camera shake using the Singleton instance
+        if (CameraShake.Instance != null) // Accessing the Singleton instance
         {
-            cameraShaker.Shake();
+            CameraShake.Instance.StartShake(); // Calling the correct method name
         }
+        else
+        {
+            Debug.LogWarning("CameraShake.Instance is null. Cannot shake camera. Make sure CameraShake script is on Main Camera and correctly set up as a Singleton.");
+        }
+
 
         // Instantiate the hit explosion prefab
         if (HitExplosion != null)
