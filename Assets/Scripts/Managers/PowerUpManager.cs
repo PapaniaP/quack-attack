@@ -10,6 +10,7 @@ public class PowerUpManager : MonoBehaviour
     public List<IMissForgivenessEffect> missForgivenessEffects = new();
     public List<ITimedEffect> timedEffects = new();
     public List<ITargetDeathEffect> deathEffects = new();
+    public List<ITargetSpawnedEffect> spawnEffects = new();
 
     [SerializeField] private PowerUpData testPowerUp; // assign via Inspector
 
@@ -54,6 +55,21 @@ public class PowerUpManager : MonoBehaviour
             case PowerUpEffectType.TargetDeathExplosion:
                 var boom = new QuacksplosiveTendenciesEffect(powerUp.level);
                 deathEffects.Add(boom);
+                break;
+
+            case PowerUpEffectType.TargetSpawnSlow:
+                var dilation = new DuckDilationEffect(powerUp.level);
+                spawnEffects.Add(dilation);
+                break;
+
+            case PowerUpEffectType.Acquisition:
+                var quack = new OneMoreQuackEffect();
+                quack.ApplyEffect(); // Trigger instantly when picked
+                break;
+
+            case PowerUpEffectType.InstantFreeze:
+                var quake = new CarnivalQuakeEffect();
+                quake.ApplyEffect(); // Freeze ducks + VFX + unfreeze
                 break;
 
             default:

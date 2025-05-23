@@ -44,6 +44,7 @@ public class GameManager : MonoBehaviour
     public bool isGameActive => currentState == GameState.Play;
     public bool isGameOver => currentState == GameState.End;
     public bool isStartScreen => currentState == GameState.StartScreen;
+    public bool IsFrozen { get; set; } = false;
 
     // Add a reference to the StartScreen
     private StartScreen startScreen;
@@ -104,7 +105,7 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (isGameActive)
+        if (isGameActive && !IsFrozen)
         {
             runTimer += Time.deltaTime;
 
@@ -117,7 +118,7 @@ public class GameManager : MonoBehaviour
 
             if (runTimer >= runDuration)
             {
-                EndGame(success: true); // or false depending on your condition
+                EndGame(success: true);
             }
         }
 
@@ -355,6 +356,21 @@ public class GameManager : MonoBehaviour
         {
             EndGame(success: false);
         }
+    }
+
+    public void AddLife(int amount)
+    {
+        if (!isGameActive) return;
+
+        currentLives += amount;
+
+        // Clamp to maxLives if needed
+        if (currentLives > maxLives)
+            currentLives = maxLives;
+
+        UpdateLivesDisplay();
+
+        Debug.Log($"[GameManager] Gained {amount} life. Total lives: {currentLives}");
     }
 
     private void UpdateLivesDisplay()

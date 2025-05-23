@@ -1,10 +1,12 @@
 using UnityEngine;
 
-// public enum PowerUpType
+// public enum PowerUpCategory
 // {
-//   Passive,
-//   Combo,
-//   Unique
+//   Offensive,
+//   Survival,
+//   Control,
+//   Legendary,
+//   Passive
 // }
 
 public enum PowerUpEffectType
@@ -14,7 +16,10 @@ public enum PowerUpEffectType
   SlowMotion,
   ExtraLife,
   MissForgiveness,
-  TargetDeathExplosion
+  TargetDeathExplosion,
+  TargetSpawnSlow,
+  Acquisition,
+  InstantFreeze,
 }
 
 [CreateAssetMenu(menuName = "PowerUps/New PowerUp")]

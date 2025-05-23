@@ -76,83 +76,90 @@ public class Target : MonoBehaviour
 
     void Update()
     {
-        transform.position += velocity * Time.deltaTime;
 
-        if (bounds != null && !bounds.bounds.Contains(transform.position))
         {
-            Vector3 center = bounds.bounds.center;
-            Vector3 extents = bounds.bounds.extents;
-            Vector3 pos = transform.position - center;
+            if (GameManager.Instance != null && GameManager.Instance.IsFrozen)
+                return;
 
-            // Check which axis is out of bounds and reflect velocity accordingly
-            if (pos.x < -extents.x || pos.x > extents.x)
-                velocity.x = -velocity.x;
-            if (pos.y < -extents.y || pos.y > extents.y)
-                velocity.y = -velocity.y;
-            if (pos.z < -extents.z || pos.z > extents.z)
-                velocity.z = -velocity.z;
+            transform.position += velocity * Time.deltaTime;
 
-            // Clamp position just inside the bounds
-            transform.position = center + new Vector3(
-                Mathf.Clamp(pos.x, -extents.x * 0.95f, extents.x * 0.95f),
-                Mathf.Clamp(pos.y, -extents.y * 0.95f, extents.y * 0.95f),
-                Mathf.Clamp(pos.z, -extents.z * 0.95f, extents.z * 0.95f)
-            );
-        }
 
-        // Timer and visual feedback
-        timer += Time.deltaTime;
-        float timeLeft = lifetime - timer;
-        UpdateVisualFeedback(timeLeft);
-
-        if (timer >= lifetime)
-        {
-            Explode();
-        }
-    }
-
-    void UpdateVisualFeedback(float timeLeft)
-    {
-        // Color change as time runs out
-        if (timeLeft < colorChangeThreshold)
-        {
-            float t = 1f - (timeLeft / colorChangeThreshold);
-
-            // More dramatic color shift (yellow -> orange -> red)
-            Color warningColor;
-            if (t < 0.5f)
-                warningColor = Color.Lerp(originalColor, Color.yellow, t * 2);
-            else
-                warningColor = Color.Lerp(Color.yellow, Color.red, (t - 0.5f) * 2);
-
-            rend.material.color = warningColor;
-
-            // Pulsing effect that intensifies as time runs out
-            float pulseIntensity = Mathf.Lerp(0.1f, 0.5f, t); // More intense pulsing as t approaches 1
-            float pulseFactor = Mathf.Lerp(
-                1 - (pulseMinScale * pulseIntensity),
-                1 + (pulseMaxScale * pulseIntensity),
-                (Mathf.Sin(Time.time * pulseSpeed * (1 + t)) + 1) / 2
-            );
-
-            transform.localScale = originalScale * pulseFactor;
-
-            // Optionally, could add emission intensity increase here if material supports it
-            if (rend.material.HasProperty("_EmissionColor"))
+            if (bounds != null && !bounds.bounds.Contains(transform.position))
             {
-                Color emissionColor = warningColor * t * 2;
-                rend.material.SetColor("_EmissionColor", emissionColor);
+                Vector3 center = bounds.bounds.center;
+                Vector3 extents = bounds.bounds.extents;
+                Vector3 pos = transform.position - center;
+
+                // Check which axis is out of bounds and reflect velocity accordingly
+                if (pos.x < -extents.x || pos.x > extents.x)
+                    velocity.x = -velocity.x;
+                if (pos.y < -extents.y || pos.y > extents.y)
+                    velocity.y = -velocity.y;
+                if (pos.z < -extents.z || pos.z > extents.z)
+                    velocity.z = -velocity.z;
+
+                // Clamp position just inside the bounds
+                transform.position = center + new Vector3(
+                    Mathf.Clamp(pos.x, -extents.x * 0.95f, extents.x * 0.95f),
+                    Mathf.Clamp(pos.y, -extents.y * 0.95f, extents.y * 0.95f),
+                    Mathf.Clamp(pos.z, -extents.z * 0.95f, extents.z * 0.95f)
+                );
+            }
+
+            // Timer and visual feedback
+            timer += Time.deltaTime;
+            float timeLeft = lifetime - timer;
+            UpdateVisualFeedback(timeLeft);
+
+            if (timer >= lifetime)
+            {
+                Explode();
             }
         }
-        else
-        {
-            // Reset to original appearance
-            rend.material.color = originalColor;
-            transform.localScale = originalScale;
 
-            if (rend.material.HasProperty("_EmissionColor"))
+        void UpdateVisualFeedback(float timeLeft)
+        {
+            // Color change as time runs out
+            if (timeLeft < colorChangeThreshold)
             {
-                rend.material.SetColor("_EmissionColor", Color.black);
+                float t = 1f - (timeLeft / colorChangeThreshold);
+
+                // More dramatic color shift (yellow -> orange -> red)
+                Color warningColor;
+                if (t < 0.5f)
+                    warningColor = Color.Lerp(originalColor, Color.yellow, t * 2);
+                else
+                    warningColor = Color.Lerp(Color.yellow, Color.red, (t - 0.5f) * 2);
+
+                rend.material.color = warningColor;
+
+                // Pulsing effect that intensifies as time runs out
+                float pulseIntensity = Mathf.Lerp(0.1f, 0.5f, t); // More intense pulsing as t approaches 1
+                float pulseFactor = Mathf.Lerp(
+                    1 - (pulseMinScale * pulseIntensity),
+                    1 + (pulseMaxScale * pulseIntensity),
+                    (Mathf.Sin(Time.time * pulseSpeed * (1 + t)) + 1) / 2
+                );
+
+                transform.localScale = originalScale * pulseFactor;
+
+                // Optionally, could add emission intensity increase here if material supports it
+                if (rend.material.HasProperty("_EmissionColor"))
+                {
+                    Color emissionColor = warningColor * t * 2;
+                    rend.material.SetColor("_EmissionColor", emissionColor);
+                }
+            }
+            else
+            {
+                // Reset to original appearance
+                rend.material.color = originalColor;
+                transform.localScale = originalScale;
+
+                if (rend.material.HasProperty("_EmissionColor"))
+                {
+                    rend.material.SetColor("_EmissionColor", Color.black);
+                }
             }
         }
     }
@@ -183,6 +190,18 @@ public class Target : MonoBehaviour
         }
 
         Destroy(gameObject);
+    }
+
+    public void ApplySlow(float multiplier)
+    {
+        velocity *= multiplier;
+        Debug.Log($"[Target] Slowed velocity to {velocity}");
+    }
+
+    public void EnableGlitterTrail()
+    {
+        // Optional: if you have a trail or particle system, enable it here
+        Debug.Log("✨ Glitter trail enabled! (Visual not implemented yet)");
     }
 
     void Explode()

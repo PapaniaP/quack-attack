@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fb65e1b03fd8d4dc381022af6b12eb7c, type: 3}
-  m_Name: New Power Up Data
+  m_Name: DuckDilation
   m_EditorClassIdentifier: 
-  powerUpName: Quacksplosive Tendencies
-  description: Ducks explode randomly on death. Damaging nearby targets.
+  powerUpName: Duck Dilation
+  description: "Some ducks fly slower. It\u2019s trippy."
   icon: {fileID: 0}
   upgradeable: 1
   level: 1
-  effectType: 5
+  effectType: 6
