@@ -11,6 +11,10 @@ public class GameManager : MonoBehaviour
     public int highScore;
     public int combo;
 
+    // Leveling system
+    private int level = 1;
+    private int nextLevelThreshold = 1000; // first level-up at 1000 points
+
     [Header("UI References")]
     public TMPro.TextMeshProUGUI scoreText;
     public TMPro.TextMeshProUGUI highScoreText;
@@ -31,10 +35,6 @@ public class GameManager : MonoBehaviour
     public float runDuration = 60f;  // total time of a run in seconds
     private float runTimer;
     public float RunProgress => Mathf.Clamp01(runTimer / runDuration);
-
-    // // Combo system
-    // public float comboResetTime = 3f;
-    // private float comboTimer;
 
     // Game state
     public enum GameState { StartScreen, Play, Pause, End }
@@ -127,23 +127,7 @@ public class GameManager : MonoBehaviour
             RestartGameKeepHighScore();
         }
 
-        // HandleComboTimer(); // (commented out, which is fine for now)
     }
-    // {
-    //     HandleComboTimer();
-    // }
-
-    // private void HandleComboTimer()
-    // {
-    //     if (combo > 0)
-    //     {
-    //         comboTimer -= Time.deltaTime;
-    //         if (comboTimer <= 0f)
-    //         {
-    //             ResetCombo();
-    //         }
-    //     }
-    // }
 
     // Combo methods
     public void AddCombo()
@@ -180,6 +164,8 @@ public class GameManager : MonoBehaviour
             scoreText.text = "Score: " + score;
 
         Debug.Log($"[GameManager] Score: {score}, High Score: {highScore}");
+
+        CheckLevelUp();  // 🚨 NEW LINE
     }
 
     // Game state methods
@@ -334,6 +320,25 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Exiting game...");
         Application.Quit();
+    }
+
+    private void CheckLevelUp()
+    {
+        if (score >= nextLevelThreshold)
+        {
+            LevelUp();
+        }
+    }
+
+    private void LevelUp()
+    {
+        level++;
+        Debug.Log($"[GameManager] Level up! Now level {level}");
+
+        nextLevelThreshold = Mathf.RoundToInt(nextLevelThreshold * 1.5f); // 1500, 2250, etc.
+
+        // TODO:🔮 Placeholder — trigger power-up UI here later
+        // PowerUpManager.Instance.ShowPowerUpMenu(level);
     }
 
     // Lives methods

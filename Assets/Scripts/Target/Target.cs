@@ -177,6 +177,11 @@ public class Target : MonoBehaviour
             Instantiate(HitExplosion, transform.position, transform.rotation);
         }
 
+        foreach (var effect in PowerUpManager.Instance.deathEffects)
+        {
+            effect.OnTargetKilled(this, transform.position);
+        }
+
         Destroy(gameObject);
     }
 

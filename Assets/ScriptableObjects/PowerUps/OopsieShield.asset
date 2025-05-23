@@ -9,6 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc8428829fc6a4ef9bf16186f90ccdb3, type: 3}
-  m_Name: DucktoniumDetonator_Effect
+  m_Script: {fileID: 11500000, guid: fb65e1b03fd8d4dc381022af6b12eb7c, type: 3}
+  m_Name: OopsieShield
   m_EditorClassIdentifier: 
+  powerUpName: Oopsie Shield
+  description: Missed a shot? Don't worry, reality forgives you and your combo shall
+    be saved.
+  icon: {fileID: 0}
+  upgradeable: 1
+  level: 1
+  effectType: 4

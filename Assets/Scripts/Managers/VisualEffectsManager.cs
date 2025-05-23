@@ -12,10 +12,23 @@ public class VisualEffectsManager : MonoBehaviour
             Destroy(gameObject);
     }
 
-    public void TriggerAOE(Vector3 position)
+    public void TriggerAOE(Vector3 position, float radius = 1f)
     {
-        Debug.Log($"[VFX] Triggering AoE effect at: {position}");
+        Debug.Log($"[VFX] Triggering AoE at {position} with radius {radius}");
 
-        // TODO: Add particle effects, camera shake, etc.
+        GameObject marker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        marker.transform.position = position;
+
+        // Scale the sphere to reflect the AoE radius (diameter = radius * 2)
+        marker.transform.localScale = Vector3.one * radius * 2f;
+
+        // Optional: Change color or make it transparent
+        Renderer rend = marker.GetComponent<Renderer>();
+        if (rend != null)
+        {
+            rend.material.color = new Color(1f, 0f, 0f, 0.3f); // red with some transparency
+        }
+
+        Destroy(marker, 1.5f);
     }
 }
