@@ -26,6 +26,11 @@ public class GameManager : MonoBehaviour
     private int currentLives;
     public int CurrentLives => currentLives;
 
+    [Header("Audio")]
+    public AudioSource sfxSource;
+    public AudioClip shootSFX;
+
+
     [Header("Lives UI")]
     public GameObject heartPrefab;  // Prefab for a single heart image
     public Transform heartsContainer;  // Parent transform to hold all hearts
@@ -401,6 +406,11 @@ public class GameManager : MonoBehaviour
         UpdateLivesDisplay();
 
         Debug.Log($"[GameManager] Gained {amount} life. Total lives: {currentLives}");
+    }
+    public void PlayShootSFX()
+    {
+        if (sfxSource != null && shootSFX != null)
+            sfxSource.PlayOneShot(shootSFX);
     }
 
     private void UpdateLivesDisplay()
