@@ -714,6 +714,7 @@ MonoBehaviour:
   highScoreText: {fileID: 76939739}
   currentScoreText: {fileID: 1104847284}
   statusMessageText: {fileID: 993592816}
+  startButtonText: {fileID: 2008373885}
   dpiSlider: {fileID: 1621769990}
   dpiValueText: {fileID: 1019275607}
 --- !u!114 &381772891
@@ -3916,7 +3917,7 @@ GameObject:
   - component: {fileID: 2008373886}
   - component: {fileID: 2008373885}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: startButtonText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
