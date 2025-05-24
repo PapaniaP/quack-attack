@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Rendering;
 
 public class StartScreen : MonoBehaviour
 {
@@ -13,6 +14,12 @@ public class StartScreen : MonoBehaviour
     public TextMeshProUGUI currentScoreText;  // For showing current score
     public TextMeshProUGUI statusMessageText;  // For showing game state messages
 
+    [Header("DPI Settings")]
+    public Slider dpiSlider;
+    public TextMeshProUGUI dpiValueText;
+    private float minDPI = 0.5f;
+    private float maxDPI = 2.0f;
+
     private void Start()
     {
         // Ensure the start screen is visible
@@ -24,6 +31,16 @@ public class StartScreen : MonoBehaviour
 
         if (quitButton != null)
             quitButton.onClick.AddListener(OnQuitButtonClicked);
+
+        // Set up DPI slider
+        if (dpiSlider != null)
+        {
+            dpiSlider.minValue = minDPI;
+            dpiSlider.maxValue = maxDPI;
+            dpiSlider.value = QualitySettings.resolutionScalingFixedDPIFactor;
+            dpiSlider.onValueChanged.AddListener(OnDPISliderChanged);
+            UpdateDPIText();
+        }
 
         // Update score displays
         UpdateScoreDisplays();
@@ -140,5 +157,19 @@ public class StartScreen : MonoBehaviour
     private void OnQuitButtonClicked()
     {
         GameManager.Instance.ExitGame();
+    }
+
+    private void OnDPISliderChanged(float value)
+    {
+        QualitySettings.resolutionScalingFixedDPIFactor = value;
+        UpdateDPIText();
+    }
+
+    private void UpdateDPIText()
+    {
+        if (dpiValueText != null)
+        {
+            dpiValueText.text = $"DPI Scale: {QualitySettings.resolutionScalingFixedDPIFactor:F2}x";
+        }
     }
 }
