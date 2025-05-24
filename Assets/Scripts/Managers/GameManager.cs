@@ -105,6 +105,19 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
+        // Check for pause key press
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            if (isGameActive)
+            {
+                PauseGame();
+            }
+            else if (isPaused)
+            {
+                ResumeGame();
+            }
+        }
+
         if (isGameActive && !IsFrozen)
         {
             runTimer += Time.deltaTime;
@@ -127,7 +140,6 @@ public class GameManager : MonoBehaviour
         {
             RestartGameKeepHighScore();
         }
-
     }
 
     // Combo methods
@@ -243,14 +255,32 @@ public class GameManager : MonoBehaviour
 
     public void PauseGame()
     {
+        if (!isGameActive) return;  // Only pause if game is active
+
         SetGameState(GameState.Pause);
         Time.timeScale = 0f;
+
+        // Update start screen for pause state
+        if (startScreen != null)
+        {
+            startScreen.ShowStartScreen();
+            startScreen.UpdateStatusMessage(GameState.Pause);
+            startScreen.SetPauseMode(true);
+        }
     }
 
     public void ResumeGame()
     {
+        if (!isPaused) return;  // Only resume if game is paused
+
         SetGameState(GameState.Play);
         Time.timeScale = 1f;
+
+        if (startScreen != null)
+        {
+            startScreen.HideStartScreen();
+            startScreen.SetPauseMode(false);
+        }
     }
 
     public void EndGame(bool success)

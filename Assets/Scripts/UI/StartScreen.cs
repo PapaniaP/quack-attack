@@ -13,12 +13,15 @@ public class StartScreen : MonoBehaviour
     public TextMeshProUGUI highScoreText;
     public TextMeshProUGUI currentScoreText;  // For showing current score
     public TextMeshProUGUI statusMessageText;  // For showing game state messages
+    public TextMeshProUGUI startButtonText;  // Reference to the start button's text component
 
     [Header("DPI Settings")]
     public Slider dpiSlider;
     public TextMeshProUGUI dpiValueText;
     private float minDPI = 0.5f;
     private float maxDPI = 2.0f;
+
+    private bool isPauseMode = false;
 
     private void Start()
     {
@@ -133,7 +136,7 @@ public class StartScreen : MonoBehaviour
                 statusMessageText.text = "Let's get it started!";
                 break;
             case GameManager.GameState.Pause:
-                statusMessageText.text = "Your game is paused";
+                statusMessageText.text = "Quack them all!";
                 break;
             case GameManager.GameState.End:
                 if (success)
@@ -150,8 +153,14 @@ public class StartScreen : MonoBehaviour
 
     private void OnStartButtonClicked()
     {
-        // Let GameManager handle the visibility through SetGameState
-        GameManager.Instance.StartGame();
+        if (isPauseMode)
+        {
+            GameManager.Instance.ResumeGame();
+        }
+        else
+        {
+            GameManager.Instance.StartGame();
+        }
     }
 
     private void OnQuitButtonClicked()
@@ -170,6 +179,25 @@ public class StartScreen : MonoBehaviour
         if (dpiValueText != null)
         {
             dpiValueText.text = $"DPI Scale: {QualitySettings.resolutionScalingFixedDPIFactor:F2}x";
+        }
+    }
+
+    public void SetPauseMode(bool pause)
+    {
+        isPauseMode = pause;
+        UpdateUIForPauseState();
+    }
+
+    private void UpdateUIForPauseState()
+    {
+        if (titleText != null)
+        {
+            titleText.text = isPauseMode ? "Game Paused" : "Quack Attack";
+        }
+
+        if (startButtonText != null)
+        {
+            startButtonText.text = isPauseMode ? "Resume Game" : "Start Game";
         }
     }
 }
