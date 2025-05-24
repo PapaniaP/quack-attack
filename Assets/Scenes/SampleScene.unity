@@ -2611,8 +2611,7 @@ MonoBehaviour:
   musicSource: {fileID: 0}
   sfxSource: {fileID: 0}
   backgroundMusic: {fileID: 8300000, guid: d9dd6b28fb7926b42a46fc2d408ecb75, type: 3}
-  shootSFX: {fileID: 8300000, guid: a75d30875d668124b902e17697d810d6, type: 3}
-  missSFX: {fileID: 8300000, guid: c6ed6722c7e344646893f4fecab8e766, type: 3}
+  shootSFX: {fileID: 8300000, guid: 57d833ad8ae4cb44a917767e794be559, type: 3}
 --- !u!1001 &1198585157
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3129,8 +3128,8 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: a75d30875d668124b902e17697d810d6, type: 3}
-  m_Resource: {fileID: 8300000, guid: a75d30875d668124b902e17697d810d6, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 57d833ad8ae4cb44a917767e794be559, type: 3}
+  m_Resource: {fileID: 8300000, guid: 57d833ad8ae4cb44a917767e794be559, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -3560,7 +3559,7 @@ MonoBehaviour:
   hudCanvas: {fileID: 821173743}
   maxLives: 5
   sfxSource: {fileID: 1451618351}
-  shootSFX: {fileID: 8300000, guid: a75d30875d668124b902e17697d810d6, type: 3}
+  shootSFX: {fileID: 8300000, guid: 57d833ad8ae4cb44a917767e794be559, type: 3}
   heartPrefab: {fileID: 1198585159}
   heartsContainer: {fileID: 513460967}
   runDuration: 180

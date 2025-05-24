@@ -6,8 +6,6 @@ public class AudioManager : MonoBehaviour
     public AudioSource sfxSource;
     public AudioClip backgroundMusic;
     public AudioClip shootSFX;
-    public AudioClip missSFX;
-
     void Start()
     {
         musicSource.clip = backgroundMusic;
