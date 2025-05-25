@@ -44,22 +44,26 @@ public class StationaryPlayer : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
                 float scoreMultiplier = 1f;
+                bool hitDuck = false;
 
                 // Determine hit zone by tag
                 if (hit.collider.CompareTag("DuckBeak"))
                 {
                     scoreMultiplier = 3f;
                     Debug.Log("🟧 BEAK SHOT! Triple points!");
+                    hitDuck = true;
                 }
                 else if (hit.collider.CompareTag("DuckHead"))
                 {
                     scoreMultiplier = 2f;
                     Debug.Log("🟨 HEADSHOT! Double points!");
+                    hitDuck = true;
                 }
                 else if (hit.collider.CompareTag("DuckBody"))
                 {
                     scoreMultiplier = 1f;
                     Debug.Log("🟩 Body shot");
+                    hitDuck = true;
                 }
                 else
                 {
@@ -84,21 +88,27 @@ public class StationaryPlayer : MonoBehaviour
                     return;
                 }
 
-                GameManager.Instance.AddCombo();
-
-
-                PowerUpManager.Instance.TriggerComboEffects(hit.collider.transform.position, GameManager.Instance.combo);
-
-                Target target = hit.collider.GetComponentInParent<Target>();
-                if (target != null)
+                if (hitDuck)
                 {
-                    target.Hit(scoreMultiplier);
+                    // Play shoot SFX only when a duck is hit
+                    GameManager.Instance.PlayShootSFX();
+
+                    GameManager.Instance.AddCombo();
+
+                    PowerUpManager.Instance.TriggerComboEffects(hit.collider.transform.position, GameManager.Instance.combo);
+
+                    Target target = hit.collider.GetComponentInParent<Target>();
+                    if (target != null)
+                    {
+                        target.Hit(scoreMultiplier);
+                    }
                 }
             }
             else
             {
                 GameManager.Instance.ResetCombo();
                 Debug.Log("Missed everything.");
+                // (You can add miss SFX here later if you want)
             }
         }
     }
