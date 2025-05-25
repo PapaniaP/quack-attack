@@ -13,7 +13,7 @@ public class GameManager : MonoBehaviour
 
     // Leveling system
     private int level = 1;
-    private int nextLevelThreshold = 1000; // first level-up at 1000 points
+    private int nextLevelThreshold; // Will be initialized from baseLevelThreshold
 
     [Header("Leveling System")]
     [SerializeField] private int baseLevelThreshold = 1000; // Starting threshold
@@ -72,6 +72,9 @@ public class GameManager : MonoBehaviour
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        // Initialize leveling system
+        nextLevelThreshold = baseLevelThreshold;
 
         // Initialize lives
         currentLives = maxLives;
@@ -302,6 +305,8 @@ public class GameManager : MonoBehaviour
         score = 0;
         highScore = 0;
         combo = 0;
+        level = 1;
+        nextLevelThreshold = baseLevelThreshold;
         currentLives = maxLives;
         runTimer = 0f;
         SetGameState(GameState.Play);
@@ -324,6 +329,8 @@ public class GameManager : MonoBehaviour
         // Reset game state
         score = 0;
         combo = 0;
+        level = 1;
+        nextLevelThreshold = baseLevelThreshold;
         currentLives = maxLives;
         runTimer = 0f;
         SetGameState(GameState.Play);
@@ -361,6 +368,7 @@ public class GameManager : MonoBehaviour
         level++;
         Debug.Log($"[GameManager] Level up! Now level {level}");
 
+        // Scale up the threshold for next level
         nextLevelThreshold = Mathf.RoundToInt(nextLevelThreshold * levelScalingFactor);
 
         // Trigger power-up selection

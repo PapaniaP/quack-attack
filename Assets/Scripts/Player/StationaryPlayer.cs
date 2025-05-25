@@ -81,6 +81,12 @@ public class StationaryPlayer : MonoBehaviour
 
                     if (!forgiven)
                     {
+                        // Play miss sound effect through AudioManager
+                        if (AudioManager.Instance != null)
+                        {
+                            AudioManager.Instance.PlayMissSFX();
+                        }
+
                         GameManager.Instance.ResetCombo();
                         Debug.Log("Missed, reset combo.");
                     }
@@ -106,9 +112,14 @@ public class StationaryPlayer : MonoBehaviour
             }
             else
             {
+                // Play miss sound effect through AudioManager
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlayMissSFX();
+                }
+
                 GameManager.Instance.ResetCombo();
                 Debug.Log("Missed everything.");
-                // (You can add miss SFX here later if you want)
             }
         }
     }
