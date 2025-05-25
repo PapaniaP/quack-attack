@@ -13,7 +13,11 @@ public class GameManager : MonoBehaviour
 
     // Leveling system
     private int level = 1;
-    private int nextLevelThreshold = 1000; // first level-up at 1000 points
+    private int nextLevelThreshold; // Will be initialized from baseLevelThreshold
+
+    [Header("Leveling System")]
+    [SerializeField] private int baseLevelThreshold = 1000; // Starting threshold
+    [SerializeField] private float levelScalingFactor = 2.2f; // How much harder each level gets
 
     [Header("UI References")]
     public TMPro.TextMeshProUGUI scoreText;
@@ -42,23 +46,35 @@ public class GameManager : MonoBehaviour
     public float RunProgress => Mathf.Clamp01(runTimer / runDuration);
 
     // Game state
-    public enum GameState { StartScreen, Play, Pause, End }
+    public enum GameState { StartScreen, Play, Pause, PowerUpSelection, End }
     public GameState currentState = GameState.StartScreen;
     private GameState previousState;
     public bool isPaused => currentState == GameState.Pause;
     public bool isGameActive => currentState == GameState.Play;
     public bool isGameOver => currentState == GameState.End;
     public bool isStartScreen => currentState == GameState.StartScreen;
+    public bool isPowerUpSelection => currentState == GameState.PowerUpSelection;
     public bool IsFrozen { get; set; } = false;
 
     // Add a reference to the StartScreen
     private StartScreen startScreen;
     private SpawnManager spawnManager;
 
+    [Header("Power-Up System")]
+    public PowerUpMenuUI powerUpMenuUI; // Reference to power-up menu
+
+    // Public properties for UI
+    public int CurrentLevel => level;
+    public int NextLevelThreshold => nextLevelThreshold;
+    public float LevelProgress => (float)score / nextLevelThreshold;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        // Initialize leveling system
+        nextLevelThreshold = baseLevelThreshold;
 
         // Initialize lives
         currentLives = maxLives;
@@ -221,6 +237,13 @@ public class GameManager : MonoBehaviour
                     startScreen.UpdateStatusMessage(state);
                 }
                 break;
+            case GameState.PowerUpSelection:
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+                if (hudCanvas != null) hudCanvas.SetActive(true);   // Keep HUD visible
+                // Don't show start screen - let PowerUpMenuUI handle its own UI
+                if (startScreen != null) startScreen.HideStartScreen();
+                break;
             case GameState.End:
                 Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;
@@ -312,6 +335,8 @@ public class GameManager : MonoBehaviour
         score = 0;
         highScore = 0;
         combo = 0;
+        level = 1;
+        nextLevelThreshold = baseLevelThreshold;
         currentLives = maxLives;
         runTimer = 0f;
         SetGameState(GameState.Play);
@@ -334,6 +359,8 @@ public class GameManager : MonoBehaviour
         // Reset game state
         score = 0;
         combo = 0;
+        level = 1;
+        nextLevelThreshold = baseLevelThreshold;
         currentLives = maxLives;
         runTimer = 0f;
         SetGameState(GameState.Play);
@@ -371,10 +398,40 @@ public class GameManager : MonoBehaviour
         level++;
         Debug.Log($"[GameManager] Level up! Now level {level}");
 
-        nextLevelThreshold = Mathf.RoundToInt(nextLevelThreshold * 1.5f); // 1500, 2250, etc.
+        // Scale up the threshold for next level
+        nextLevelThreshold = Mathf.RoundToInt(nextLevelThreshold * levelScalingFactor);
 
-        // TODO:🔮 Placeholder — trigger power-up UI here later
-        // PowerUpManager.Instance.ShowPowerUpMenu(level);
+        // Trigger power-up selection
+        TriggerPowerUpSelection();
+    }
+
+    public void TriggerPowerUpSelection()
+    {
+        if (powerUpMenuUI != null && PowerUpManager.Instance != null)
+        {
+            var options = PowerUpManager.Instance.GetRandomPowerUpOptions(2);
+            if (options.Count >= 2)
+            {
+                SetGameState(GameState.PowerUpSelection);
+                powerUpMenuUI.Show(options);
+                Debug.Log("[GameManager] Power-up selection triggered");
+            }
+            else
+            {
+                Debug.LogWarning("[GameManager] Not enough power-ups available for selection");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[GameManager] PowerUpMenuUI or PowerUpManager not found");
+        }
+    }
+
+    public void OnPowerUpSelectionComplete()
+    {
+        // Called by PowerUpMenuUI when selection is complete
+        SetGameState(GameState.Play);
+        Debug.Log("[GameManager] Power-up selection complete, resuming game");
     }
 
     // Lives methods
@@ -399,13 +456,16 @@ public class GameManager : MonoBehaviour
 
         currentLives += amount;
 
-        // Clamp to maxLives if needed
+        // Increase maxLives if current lives exceeds it
         if (currentLives > maxLives)
-            currentLives = maxLives;
+        {
+            maxLives = currentLives;
+            InitializeHearts(); // Recreate hearts to match new max
+        }
 
         UpdateLivesDisplay();
 
-        Debug.Log($"[GameManager] Gained {amount} life. Total lives: {currentLives}");
+        Debug.Log($"[GameManager] Gained {amount} life. Total lives: {currentLives}, Max lives: {maxLives}");
     }
     public void PlayShootSFX()
     {

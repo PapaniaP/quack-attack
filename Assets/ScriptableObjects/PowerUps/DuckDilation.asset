@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   powerUpName: Duck Dilation
   description: "Some ducks fly slower. It\u2019s trippy."
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: f9e3739d2d79f4eb1b99726850c72ae3, type: 3}
   upgradeable: 1
   level: 1
   effectType: 6

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   powerUpName: Carnival Quake
   description: Reality shakes. Ducks panic. Everything freezes.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: b911c4d44c22241d6be26c556c5e92e6, type: 3}
   upgradeable: 0
   level: 1
   effectType: 8
