@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   powerUpName: Quacksplosive Tendencies
   description: Ducks explode randomly on death. Damaging nearby targets.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 135a289cf4d03438d9b8dc337acdab04, type: 3}
   upgradeable: 1
   level: 1
   effectType: 5

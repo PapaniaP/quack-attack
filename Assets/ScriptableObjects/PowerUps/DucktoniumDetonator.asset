@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   powerUpName: Ducktonium Detonator
   description: On combo streak, the next duck killed triggers an AoE explosion.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: cef17e6e05b7d44449cd41e259780a76, type: 3}
   upgradeable: 1
   level: 1
   effectType: 1

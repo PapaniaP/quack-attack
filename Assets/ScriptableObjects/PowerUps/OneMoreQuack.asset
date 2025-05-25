@@ -16,7 +16,7 @@ MonoBehaviour:
   description: 'Instantly gain +1 life. Duck-deity approved.
 
 '
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: f10e71fde99664347b5d526566bee27d, type: 3}
   upgradeable: 1
   level: 1
   effectType: 7

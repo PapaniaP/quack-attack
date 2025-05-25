@@ -15,7 +15,7 @@ MonoBehaviour:
   powerUpName: Oopsie Shield
   description: Missed a shot? Don't worry, reality forgives you and your combo shall
     be saved.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 1e63c92e7616844dfa39f646525cadc0, type: 3}
   upgradeable: 1
   level: 1
   effectType: 4
