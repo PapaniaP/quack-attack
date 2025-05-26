@@ -223,7 +223,7 @@ Transform:
   m_GameObject: {fileID: 2856990248644545771}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.05, z: -0}
+  m_LocalPosition: {x: 0, y: 0, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -270,9 +270,14 @@ MonoBehaviour:
   moveSpeed: 2
   lifetime: 10
   colorChangeThreshold: 1.5
+  earlyGameMinTime: 5
+  earlyGameMaxTime: 10
+  lateGameMinTime: 3
+  lateGameMaxTime: 5
   pulseMinScale: 0.999
   pulseMaxScale: 1.001
   pulseSpeed: 1
+  pulseType: 0
   boundsObject: {fileID: 0}
   HitExplosion: {fileID: 9092091760150505607, guid: b79b8d5676746d94b8540a4dd5b40387, type: 3}
 --- !u!1 &6249795595363920738

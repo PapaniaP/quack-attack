@@ -7,8 +7,19 @@ public class Target : MonoBehaviour
 
     [Header("Target Options")]
     public float moveSpeed = 3f;
-    public float lifetime = 5f;
+    public float lifetime = 5f; // This will be overridden by variable timing
     public float colorChangeThreshold = 1.5f;
+
+    [Header("Variable Lifetime Settings")]
+    public float earlyGameMinTime = 5f;
+    public float earlyGameMaxTime = 10f;
+    public float lateGameMinTime = 3f;
+    public float lateGameMaxTime = 5f;
+
+    [Header("Movement Settings")]
+    public float bounceRandomization = 0.3f; // How much randomization to add to bounces
+    public float earlyGameSpeedMultiplier = 0.7f; // Speed multiplier for early game
+    public float lateGameSpeedMultiplier = 1.5f; // Speed multiplier for late game
 
     [Header("Visual Feedback")]
     public float pulseMinScale = 0.999f;
@@ -48,15 +59,28 @@ public class Target : MonoBehaviour
         // --- END OF REMOVED CODE BLOCK ---
 
         float difficulty = GameManager.Instance != null ? GameManager.Instance.RunProgress : 0f;
-        float adjustedSpeed = Mathf.Lerp(1f, moveSpeed, difficulty); // starts at 1, ramps to moveSpeed
+
+        // Variable lifetime based on difficulty
+        float minTime = Mathf.Lerp(earlyGameMinTime, lateGameMinTime, difficulty);
+        float maxTime = Mathf.Lerp(earlyGameMaxTime, lateGameMaxTime, difficulty);
+        lifetime = Random.Range(minTime, maxTime);
+
+        // Difficulty-scaled movement patterns
+        float speedMultiplier = Mathf.Lerp(earlyGameSpeedMultiplier, lateGameSpeedMultiplier, difficulty);
+
+        // Movement becomes more erratic with difficulty
+        float directionRandomness = Mathf.Lerp(0.5f, 1.0f, difficulty); // Less random early, more random late
         Vector3 biasedDirection = new Vector3(
-            Random.Range(-1f, 1f),      // Full X range (left-right)
-            Random.Range(-0.5f, 0.5f),  // Less Y movement (up-down)
-            Random.Range(-0.2f, 0.2f)   // Tiny Z movement (depth)
+            Random.Range(-directionRandomness, directionRandomness),      // X movement scales with difficulty
+            Random.Range(-directionRandomness * 0.5f, directionRandomness * 0.5f),  // Y movement (less than X)
+            Random.Range(-0.2f, 0.2f)   // Z movement stays minimal
         ).normalized;
 
-        float randomSpeed = Random.Range(-1f * moveSpeed, 2f * moveSpeed);
-        velocity = biasedDirection * randomSpeed;
+        // Speed variation also scales with difficulty
+        float speedVariation = Mathf.Lerp(0.5f, 2.0f, difficulty); // Early: 0.5x-1.5x, Late: 0.5x-2.5x
+        float randomSpeed = Random.Range(moveSpeed * (1 - speedVariation), moveSpeed * (1 + speedVariation));
+
+        velocity = biasedDirection * randomSpeed * speedMultiplier;
 
         if (boundsObject != null)
         {
@@ -78,90 +102,119 @@ public class Target : MonoBehaviour
 
     void Update()
     {
+        // Don't update if game is not active (paused, power-up selection, etc.)
+        if (GameManager.Instance != null && !GameManager.Instance.isGameActive)
+            return;
 
+        // Don't update if frozen by power-ups
+        if (GameManager.Instance != null && GameManager.Instance.IsFrozen)
+            return;
+
+        transform.position += velocity * Time.deltaTime;
+
+        if (bounds != null && !bounds.bounds.Contains(transform.position))
         {
-            if (GameManager.Instance != null && GameManager.Instance.IsFrozen)
-                return;
+            Vector3 center = bounds.bounds.center;
+            Vector3 extents = bounds.bounds.extents;
+            Vector3 pos = transform.position - center;
 
-            transform.position += velocity * Time.deltaTime;
+            // Curved bouncing with physics-based reflection
+            Vector3 wallNormal = Vector3.zero;
+            bool hitWall = false;
 
-
-            if (bounds != null && !bounds.bounds.Contains(transform.position))
+            // Determine which wall(s) we hit and calculate the normal
+            if (pos.x < -extents.x || pos.x > extents.x)
             {
-                Vector3 center = bounds.bounds.center;
-                Vector3 extents = bounds.bounds.extents;
-                Vector3 pos = transform.position - center;
-
-                // Check which axis is out of bounds and reflect velocity accordingly
-                if (pos.x < -extents.x || pos.x > extents.x)
-                    velocity.x = -velocity.x;
-                if (pos.y < -extents.y || pos.y > extents.y)
-                    velocity.y = -velocity.y;
-                if (pos.z < -extents.z || pos.z > extents.z)
-                    velocity.z = -velocity.z;
-
-                // Clamp position just inside the bounds
-                transform.position = center + new Vector3(
-                    Mathf.Clamp(pos.x, -extents.x * 0.95f, extents.x * 0.95f),
-                    Mathf.Clamp(pos.y, -extents.y * 0.95f, extents.y * 0.95f),
-                    Mathf.Clamp(pos.z, -extents.z * 0.95f, extents.z * 0.95f)
-                );
+                wallNormal.x = pos.x < 0 ? 1 : -1; // Normal points inward
+                hitWall = true;
+            }
+            if (pos.y < -extents.y || pos.y > extents.y)
+            {
+                wallNormal.y = pos.y < 0 ? 1 : -1; // Normal points inward
+                hitWall = true;
+            }
+            if (pos.z < -extents.z || pos.z > extents.z)
+            {
+                wallNormal.z = pos.z < 0 ? 1 : -1; // Normal points inward
+                hitWall = true;
             }
 
-            // Timer and visual feedback
-            timer += Time.deltaTime;
-            float timeLeft = lifetime - timer;
-            UpdateVisualFeedback(timeLeft);
-
-            if (timer >= lifetime)
+            if (hitWall)
             {
-                Explode();
+                // Normalize the wall normal (important for corner bounces)
+                wallNormal = wallNormal.normalized;
+
+                // Physics-accurate reflection
+                velocity = Vector3.Reflect(velocity, wallNormal);
+
+                // Add slight randomization to prevent perfect bouncing patterns
+                Vector3 randomization = Random.insideUnitSphere * bounceRandomization;
+                randomization = Vector3.ProjectOnPlane(randomization, wallNormal); // Keep randomization parallel to wall
+                velocity += randomization;
+
             }
+
+            // Clamp position just inside the bounds
+            transform.position = center + new Vector3(
+                Mathf.Clamp(pos.x, -extents.x * 0.95f, extents.x * 0.95f),
+                Mathf.Clamp(pos.y, -extents.y * 0.95f, extents.y * 0.95f),
+                Mathf.Clamp(pos.z, -extents.z * 0.95f, extents.z * 0.95f)
+            );
         }
 
-        void UpdateVisualFeedback(float timeLeft)
+        // Timer and visual feedback
+        timer += Time.deltaTime;
+        float timeLeft = lifetime - timer;
+        UpdateVisualFeedback(timeLeft);
+
+        if (timer >= lifetime)
         {
-            // Color change as time runs out
-            if (timeLeft < colorChangeThreshold)
-            {
-                float t = 1f - (timeLeft / colorChangeThreshold);
+            Explode();
+        }
+    }
 
-                // More dramatic color shift (yellow -> orange -> red)
-                Color warningColor;
-                if (t < 0.5f)
-                    warningColor = Color.Lerp(originalColor, Color.yellow, t * 2);
-                else
-                    warningColor = Color.Lerp(Color.yellow, Color.red, (t - 0.5f) * 2);
+    void UpdateVisualFeedback(float timeLeft)
+    {
+        // Color change as time runs out
+        if (timeLeft < colorChangeThreshold)
+        {
+            float t = 1f - (timeLeft / colorChangeThreshold);
 
-                rend.material.color = warningColor;
-
-                // Pulsing effect that intensifies as time runs out
-                float pulseIntensity = Mathf.Lerp(0.1f, 0.5f, t); // More intense pulsing as t approaches 1
-                float pulseFactor = Mathf.Lerp(
-                    1 - (pulseMinScale * pulseIntensity),
-                    1 + (pulseMaxScale * pulseIntensity),
-                    (Mathf.Sin(Time.time * pulseSpeed * (1 + t)) + 1) / 2
-                );
-
-                transform.localScale = originalScale * pulseFactor;
-
-                // Optionally, could add emission intensity increase here if material supports it
-                if (rend.material.HasProperty("_EmissionColor"))
-                {
-                    Color emissionColor = warningColor * t * 2;
-                    rend.material.SetColor("_EmissionColor", emissionColor);
-                }
-            }
+            // More dramatic color shift (yellow -> orange -> red)
+            Color warningColor;
+            if (t < 0.5f)
+                warningColor = Color.Lerp(originalColor, Color.yellow, t * 2);
             else
-            {
-                // Reset to original appearance
-                rend.material.color = originalColor;
-                transform.localScale = originalScale;
+                warningColor = Color.Lerp(Color.yellow, Color.red, (t - 0.5f) * 2);
 
-                if (rend.material.HasProperty("_EmissionColor"))
-                {
-                    rend.material.SetColor("_EmissionColor", Color.black);
-                }
+            rend.material.color = warningColor;
+
+            // Pulsing effect that intensifies as time runs out
+            float pulseIntensity = Mathf.Lerp(0.1f, 0.5f, t); // More intense pulsing as t approaches 1
+            float pulseFactor = Mathf.Lerp(
+                1 - (pulseMinScale * pulseIntensity),
+                1 + (pulseMaxScale * pulseIntensity),
+                (Mathf.Sin(Time.time * pulseSpeed * (1 + t)) + 1) / 2
+            );
+
+            transform.localScale = originalScale * pulseFactor;
+
+            // Optionally, could add emission intensity increase here if material supports it
+            if (rend.material.HasProperty("_EmissionColor"))
+            {
+                Color emissionColor = warningColor * t * 2;
+                rend.material.SetColor("_EmissionColor", emissionColor);
+            }
+        }
+        else
+        {
+            // Reset to original appearance
+            rend.material.color = originalColor;
+            transform.localScale = originalScale;
+
+            if (rend.material.HasProperty("_EmissionColor"))
+            {
+                rend.material.SetColor("_EmissionColor", Color.black);
             }
         }
     }
@@ -169,10 +222,10 @@ public class Target : MonoBehaviour
     public void Hit(float multiplier = 1f)
     {
         int basePoints = 100;
-        int finalPoints = Mathf.RoundToInt(basePoints * multiplier);
+        int hitZonePoints = Mathf.RoundToInt(basePoints * multiplier);
 
-        GameManager.Instance.AddPoints(finalPoints);
-        Debug.Log($"[Target] Hit! Multiplier: {multiplier}, Points: {finalPoints}");
+        // Use new method that applies combo multiplier to the hit zone points
+        GameManager.Instance.AddPointsWithCombo(hitZonePoints);
 
         // Trigger camera shake using the Singleton instance
         if (CameraShake.Instance != null) // Accessing the Singleton instance
@@ -183,7 +236,6 @@ public class Target : MonoBehaviour
         {
             Debug.LogWarning("CameraShake.Instance is null. Cannot shake camera. Make sure CameraShake script is on Main Camera and correctly set up as a Singleton.");
         }
-
 
         // Instantiate the hit explosion prefab
         if (HitExplosion != null)
@@ -196,25 +248,39 @@ public class Target : MonoBehaviour
             effect.OnTargetKilled(this, transform.position);
         }
 
+        // Notify SpawnManager that target was destroyed
+        SpawnManager spawnManager = FindFirstObjectByType<SpawnManager>();
+        if (spawnManager != null)
+        {
+            spawnManager.OnTargetDestroyed();
+        }
+
         Destroy(gameObject);
     }
 
     public void ApplySlow(float multiplier)
     {
         velocity *= multiplier;
-        Debug.Log($"[Target] Slowed velocity to {velocity}");
     }
 
-    public void EnableGlitterTrail()
-    {
-        // Optional: if you have a trail or particle system, enable it here
-        Debug.Log("✨ Glitter trail enabled! (Visual not implemented yet)");
-    }
+    // TODO: Implement glitter trail
+    // public void EnableGlitterTrail()
+    // {
+    //     // Optional: if you have a trail or particle system, enable it here
+    //     Debug.Log("✨ Glitter trail enabled! (Visual not implemented yet)");
+    // }
 
     void Explode()
     {
-        Debug.Log("💥 Duck exploded!");
         GameManager.Instance.RemoveLife();
+
+        // Notify SpawnManager that target was destroyed
+        SpawnManager spawnManager = FindFirstObjectByType<SpawnManager>();
+        if (spawnManager != null)
+        {
+            spawnManager.OnTargetDestroyed();
+        }
+
         Destroy(gameObject);
     }
 }

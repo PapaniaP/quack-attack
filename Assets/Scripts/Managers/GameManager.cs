@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     public int score;
     public int highScore;
     public int combo;
+    public int lastPointsEarned; // For combo display - shows points earned from last hit
 
     // Leveling system
     private int level = 1;
@@ -148,7 +149,6 @@ public class GameManager : MonoBehaviour
         {
             RestartGameKeepHighScore();
         }
-
     }
 
     // Combo methods
@@ -161,6 +161,7 @@ public class GameManager : MonoBehaviour
     public void ResetCombo()
     {
         combo = 0;
+        lastPointsEarned = 0; // Reset points display when combo resets
         // comboTimer = 0f;
         Debug.Log("[GameManager] Combo reset");
     }
@@ -188,6 +189,22 @@ public class GameManager : MonoBehaviour
         Debug.Log($"[GameManager] Score: {score}, High Score: {highScore}");
 
         CheckLevelUp();  // 🚨 NEW LINE
+    }
+
+    // New method: Add points with combo multiplier
+    public void AddPointsWithCombo(int basePoints)
+    {
+        // Calculate points with combo multiplier (minimum 1x)
+        int comboMultiplier = Mathf.Max(1, combo);
+        int pointsEarned = basePoints * comboMultiplier;
+
+        // Store for combo display
+        lastPointsEarned = pointsEarned;
+
+        // Add to total score
+        AddPoints(pointsEarned);
+
+        Debug.Log($"[GameManager] Base: {basePoints}, Combo: {combo}x, Earned: {pointsEarned}");
     }
 
     // Game state methods
@@ -228,6 +245,7 @@ public class GameManager : MonoBehaviour
             case GameState.PowerUpSelection:
                 Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;
+                Time.timeScale = 0f; // Pause the game during power-up selection
                 if (hudCanvas != null) hudCanvas.SetActive(true);   // Keep HUD visible
                 // Don't show start screen - let PowerUpMenuUI handle its own UI
                 if (startScreen != null) startScreen.HideStartScreen();
@@ -248,8 +266,16 @@ public class GameManager : MonoBehaviour
     {
         score = 0;
         combo = 0;
+        lastPointsEarned = 0;
         currentLives = maxLives;
         runTimer = 0f;
+
+        // Reset power-ups for fresh start
+        if (PowerUpManager.Instance != null)
+        {
+            PowerUpManager.Instance.ResetPowerUps();
+        }
+
         SetGameState(GameState.Play);
         Time.timeScale = 1f; // Resume game time
 
@@ -305,10 +331,18 @@ public class GameManager : MonoBehaviour
         score = 0;
         highScore = 0;
         combo = 0;
+        lastPointsEarned = 0;
         level = 1;
         nextLevelThreshold = baseLevelThreshold;
         currentLives = maxLives;
         runTimer = 0f;
+
+        // Reset power-ups
+        if (PowerUpManager.Instance != null)
+        {
+            PowerUpManager.Instance.ResetPowerUps();
+        }
+
         SetGameState(GameState.Play);
 
         if (scoreText != null)
@@ -329,10 +363,18 @@ public class GameManager : MonoBehaviour
         // Reset game state
         score = 0;
         combo = 0;
+        lastPointsEarned = 0;
         level = 1;
         nextLevelThreshold = baseLevelThreshold;
         currentLives = maxLives;
         runTimer = 0f;
+
+        // Reset power-ups
+        if (PowerUpManager.Instance != null)
+        {
+            PowerUpManager.Instance.ResetPowerUps();
+        }
+
         SetGameState(GameState.Play);
 
         // Restore high score
@@ -401,6 +443,7 @@ public class GameManager : MonoBehaviour
     {
         // Called by PowerUpMenuUI when selection is complete
         SetGameState(GameState.Play);
+        Time.timeScale = 1f; // Resume game time
         Debug.Log("[GameManager] Power-up selection complete, resuming game");
     }
 
@@ -422,7 +465,8 @@ public class GameManager : MonoBehaviour
 
     public void AddLife(int amount)
     {
-        if (!isGameActive) return;
+        // Allow adding lives during gameplay and power-up selection
+        if (!isGameActive && !isPowerUpSelection) return;
 
         currentLives += amount;
 

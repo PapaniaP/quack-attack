@@ -48,7 +48,6 @@ public class PowerUpManager : MonoBehaviour
     public void ApplyPowerUp(PowerUpData powerUp)
     {
         AddPowerUp(powerUp);
-        Debug.Log($"[PowerUpManager] Player selected: {powerUp.powerUpName}");
     }
 
     // Called by UI when player skips power-up selection
@@ -56,8 +55,6 @@ public class PowerUpManager : MonoBehaviour
     {
         // Give player points for skipping (risk/reward choice)
         GameManager.Instance.AddPoints(skipRewardPoints);
-
-        Debug.Log($"[PowerUpManager] Player skipped power-up selection and gained {skipRewardPoints} points");
     }
 
     // Get current level of a specific power-up type
@@ -80,7 +77,6 @@ public class PowerUpManager : MonoBehaviour
 
         if (availablePowerUps.Count == 0)
         {
-            Debug.LogWarning("[PowerUpManager] No available power-ups in pool!");
             return options;
         }
 
@@ -189,20 +185,44 @@ public class PowerUpManager : MonoBehaviour
 
         if (existingPowerUp != null && existingPowerUp.upgradeable)
         {
-            // Upgrade existing power-up
-            existingPowerUp.level = powerUp.level;
-            Debug.Log($"[PowerUpManager] Upgraded {existingPowerUp.powerUpName} to level {powerUp.level}");
+            // Create a new copy instead of modifying the existing one
+            var upgradedCopy = ScriptableObject.CreateInstance<PowerUpData>();
+            upgradedCopy.powerUpName = existingPowerUp.powerUpName;
+            upgradedCopy.icon = existingPowerUp.icon;
+            upgradedCopy.effectType = existingPowerUp.effectType;
+            upgradedCopy.upgradeable = existingPowerUp.upgradeable;
+            upgradedCopy.level = powerUp.level;
+            upgradedCopy.description = powerUp.description;
+
+            // Replace the existing power-up with the upgraded copy
+            int index = acquiredPowerUps.IndexOf(existingPowerUp);
+
+            // Destroy the old copy if it was runtime-created
+            if (!availablePowerUps.Contains(existingPowerUp))
+            {
+                DestroyImmediate(existingPowerUp);
+            }
+
+            acquiredPowerUps[index] = upgradedCopy;
 
             // Remove old effects and add upgraded ones
             RemoveEffectsOfType(powerUp.effectType);
-            AddEffectForPowerUp(powerUp);
+            AddEffectForPowerUp(upgradedCopy);
         }
         else
         {
-            // Add new power-up
-            acquiredPowerUps.Add(powerUp);
-            AddEffectForPowerUp(powerUp);
-            Debug.Log($"[PowerUpManager] Acquired new power-up: {powerUp.powerUpName}");
+            // For new power-ups, create a copy to avoid modifying the original asset
+            var powerUpCopy = ScriptableObject.CreateInstance<PowerUpData>();
+            powerUpCopy.powerUpName = powerUp.powerUpName;
+            powerUpCopy.icon = powerUp.icon;
+            powerUpCopy.effectType = powerUp.effectType;
+            powerUpCopy.upgradeable = powerUp.upgradeable;
+            powerUpCopy.level = powerUp.level;
+            powerUpCopy.description = powerUp.description;
+
+            // Add new power-up copy
+            acquiredPowerUps.Add(powerUpCopy);
+            AddEffectForPowerUp(powerUpCopy);
         }
 
         // Update HUD display
@@ -275,7 +295,6 @@ public class PowerUpManager : MonoBehaviour
                 break;
 
             default:
-                Debug.LogWarning($"[PowerUpManager] No effect logic mapped for: {powerUp.effectType}");
                 break;
         }
     }
@@ -286,5 +305,32 @@ public class PowerUpManager : MonoBehaviour
         {
             effect.OnComboReached(position, combo);
         }
+    }
+
+    // Reset all power-ups when game restarts
+    public void ResetPowerUps()
+    {
+        // Destroy any runtime-created PowerUpData instances to prevent persistence
+        foreach (var powerUp in acquiredPowerUps)
+        {
+            // If this is a runtime-created upgrade (not an original asset), destroy it
+            if (powerUp != null && !availablePowerUps.Contains(powerUp))
+            {
+                DestroyImmediate(powerUp);
+            }
+        }
+
+        // Clear all acquired power-ups
+        acquiredPowerUps.Clear();
+
+        // Clear all active effects
+        activeEffects.Clear();
+        missForgivenessEffects.Clear();
+        timedEffects.Clear();
+        deathEffects.Clear();
+        spawnEffects.Clear();
+
+        // Update HUD to reflect empty state
+        UpdateHUD();
     }
 }

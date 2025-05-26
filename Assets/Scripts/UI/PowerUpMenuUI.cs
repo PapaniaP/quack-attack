@@ -14,7 +14,7 @@ public class PowerUpMenuUI : MonoBehaviour
   public CanvasGroup canvasGroup; // Add this for fade in/out
 
   [Header("Testing")]
-  public KeyCode testKey = KeyCode.P; // Press P to test
+  public KeyCode testKey = KeyCode.L;
 
   private PowerUpCardUI selectedCard = null;
   private List<PowerUpCardUI> spawnedCards = new();
