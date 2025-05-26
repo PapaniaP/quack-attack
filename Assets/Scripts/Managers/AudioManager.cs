@@ -35,4 +35,20 @@ public class AudioManager : MonoBehaviour
             sfxSource.PlayOneShot(missSFX);
         }
     }
+
+    public void PauseMusic()
+    {
+        if (musicSource != null && musicSource.isPlaying)
+        {
+            musicSource.Pause();
+        }
+    }
+
+    public void ResumeMusic()
+    {
+        if (musicSource != null && !musicSource.isPlaying)
+        {
+            musicSource.UnPause();
+        }
+    }
 }

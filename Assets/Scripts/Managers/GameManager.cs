@@ -315,6 +315,12 @@ public class GameManager : MonoBehaviour
         SetGameState(GameState.Pause);
         Time.timeScale = 0f;
 
+        // Pause music
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PauseMusic();
+        }
+
         // Update start screen for pause state
         if (startScreen != null)
         {
@@ -330,6 +336,12 @@ public class GameManager : MonoBehaviour
 
         SetGameState(GameState.Play);
         Time.timeScale = 1f;
+
+        // Resume music
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.ResumeMusic();
+        }
 
         if (startScreen != null)
         {
@@ -374,8 +386,16 @@ public class GameManager : MonoBehaviour
             PowerUpManager.Instance.ResetPowerUps();
         }
 
-        SetGameState(GameState.Play);
+        // Reset and spawn new targets
+        if (spawnManager != null)
+        {
+            spawnManager.ResetAndSpawn();
+        }
 
+        SetGameState(GameState.Play);
+        Time.timeScale = 1f; // Ensure game time is resumed
+
+        // Update UI
         if (scoreText != null)
             scoreText.text = "Score: 0";
         if (highScoreText != null)
@@ -384,6 +404,8 @@ public class GameManager : MonoBehaviour
             timerText.text = $"Time: {Mathf.CeilToInt(runDuration)}s";
 
         InitializeHearts();  // Reset hearts display
+
+        Debug.Log("[GameManager] Game restarted (full reset)");
     }
 
     public void RestartGameKeepHighScore()
@@ -406,7 +428,14 @@ public class GameManager : MonoBehaviour
             PowerUpManager.Instance.ResetPowerUps();
         }
 
+        // Reset and spawn new targets
+        if (spawnManager != null)
+        {
+            spawnManager.ResetAndSpawn();
+        }
+
         SetGameState(GameState.Play);
+        Time.timeScale = 1f; // Ensure game time is resumed
 
         // Restore high score
         highScore = savedHighScore;
@@ -420,12 +449,21 @@ public class GameManager : MonoBehaviour
             timerText.text = $"Time: {Mathf.CeilToInt(runDuration)}s";
 
         InitializeHearts();  // Reset hearts display
+
+        Debug.Log("[GameManager] Game restarted (high score preserved)");
     }
 
     public void ExitGame()
     {
         Debug.Log("Exiting game...");
-        Application.Quit();
+
+#if UNITY_EDITOR
+        // Stop playing the game in the Unity Editor
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+            // Quit the application in a built game
+            Application.Quit();
+#endif
     }
 
     private void CheckLevelUp()
