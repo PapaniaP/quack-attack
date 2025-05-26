@@ -174,9 +174,22 @@ public class GameManager : MonoBehaviour
     public void ResetCombo()
     {
         combo = 0;
-        lastPointsEarned = 0; // Reset points display when combo resets
-        // comboTimer = 0f;
+        // Don't immediately reset lastPointsEarned here - let the UI animation play first
+        // It will be reset after the animation completes or by the next hit
         Debug.Log("[GameManager] Combo reset");
+    }
+
+    // Miss penalty method
+    public void ApplyMissPenalty()
+    {
+        int penalty = 80;
+        score = Mathf.Max(0, score - penalty); // Don't let score go negative
+        lastPointsEarned = -penalty; // Show negative points in combo display
+
+        if (scoreText != null)
+            scoreText.text = "Score: " + score;
+
+        Debug.Log($"[GameManager] Miss penalty applied: -{penalty} points. Score: {score}");
     }
 
     // Score methods
@@ -211,7 +224,7 @@ public class GameManager : MonoBehaviour
         int comboMultiplier = Mathf.Max(1, combo);
         int pointsEarned = basePoints * comboMultiplier;
 
-        // Store for combo display
+        // Store for combo display (positive points)
         lastPointsEarned = pointsEarned;
 
         // Add to total score

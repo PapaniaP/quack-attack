@@ -110,8 +110,8 @@ public class ComboDisplay : MonoBehaviour
           TriggerPulseEffect();
         }
 
-        // Trigger points animation when points change
-        if (newPointsEarned != previousPointsEarned && newPointsEarned > 0)
+        // Trigger points animation when points change (including negative points)
+        if (newPointsEarned != previousPointsEarned && newPointsEarned != 0)
         {
           TriggerPointsAnimation();
         }
@@ -121,8 +121,8 @@ public class ComboDisplay : MonoBehaviour
 
   private void UpdateDisplay()
   {
-    // Show/hide combo display
-    bool shouldShow = currentCombo > 0;
+    // Show/hide combo display - show if combo > 0 OR if showing negative points
+    bool shouldShow = currentCombo > 0 || currentPointsEarned < 0;
     if (comboContainer != null)
     {
       comboContainer.SetActive(shouldShow);
@@ -130,18 +130,24 @@ public class ComboDisplay : MonoBehaviour
 
     if (!shouldShow) return;
 
-    // Update multiplier text (stays white, shows combo)
+    // Update multiplier text (stays white, shows combo or miss penalty)
     if (multiplierText != null)
     {
-      if (currentCombo >= 10)
+      if (currentPointsEarned < 0)
+      {
+        multiplierText.text = "MISS!";
+        multiplierText.color = Color.red;
+      }
+      else if (currentCombo >= 10)
       {
         multiplierText.text = $"{currentCombo}x COMBO!";
+        multiplierText.color = Color.white;
       }
       else
       {
         multiplierText.text = $"x{currentCombo}";
+        multiplierText.color = Color.white;
       }
-      multiplierText.color = Color.white; // Always white
     }
 
     // Update colors based on combo level (for background)
@@ -153,13 +159,23 @@ public class ComboDisplay : MonoBehaviour
     // Update points text (colored based on point value)
     if (pointsEarnedText != null)
     {
-      pointsEarnedText.text = $"+{currentPointsEarned}pts";
+      // Handle negative points (miss penalty)
+      if (currentPointsEarned < 0)
+      {
+        pointsEarnedText.text = $"{currentPointsEarned}pts"; // Already has negative sign
+      }
+      else
+      {
+        pointsEarnedText.text = $"+{currentPointsEarned}pts";
+      }
 
       // Only update color if not currently animating (to avoid interfering with fade)
       if (pointsAnimationCoroutine == null)
       {
-        pointsOriginalColor = pointColor; // Update the original color based on points
-        pointsEarnedText.color = pointColor;
+        // Use red color for negative points, otherwise use point-based color
+        Color displayColor = currentPointsEarned < 0 ? Color.red : pointColor;
+        pointsOriginalColor = displayColor;
+        pointsEarnedText.color = displayColor;
       }
     }
 
@@ -304,6 +320,12 @@ public class ComboDisplay : MonoBehaviour
     finalColor.a = 0f;
     pointsEarnedText.color = finalColor;
     pointsEarnedText.transform.localScale = pointsOriginalScale;
+
+    // Clear negative points from GameManager after animation
+    if (currentPointsEarned < 0 && GameManager.Instance != null)
+    {
+      GameManager.Instance.lastPointsEarned = 0;
+    }
 
     pointsAnimationCoroutine = null;
   }

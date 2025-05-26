@@ -83,6 +83,7 @@ public class StationaryPlayer : MonoBehaviour
                             AudioManager.Instance.PlayMissSFX();
                         }
 
+                        GameManager.Instance.ApplyMissPenalty();
                         GameManager.Instance.ResetCombo();
                     }
 
@@ -112,7 +113,7 @@ public class StationaryPlayer : MonoBehaviour
                 {
                     AudioManager.Instance.PlayMissSFX();
                 }
-
+                GameManager.Instance.ApplyMissPenalty();
                 GameManager.Instance.ResetCombo();
             }
         }
