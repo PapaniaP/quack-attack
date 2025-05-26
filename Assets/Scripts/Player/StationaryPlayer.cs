@@ -50,19 +50,16 @@ public class StationaryPlayer : MonoBehaviour
                 if (hit.collider.CompareTag("DuckBeak"))
                 {
                     scoreMultiplier = 3f;
-                    Debug.Log("🟧 BEAK SHOT! Triple points!");
                     hitDuck = true;
                 }
                 else if (hit.collider.CompareTag("DuckHead"))
                 {
                     scoreMultiplier = 2f;
-                    Debug.Log("🟨 HEADSHOT! Double points!");
                     hitDuck = true;
                 }
                 else if (hit.collider.CompareTag("DuckBody"))
                 {
                     scoreMultiplier = 1f;
-                    Debug.Log("🟩 Body shot");
                     hitDuck = true;
                 }
                 else
@@ -74,7 +71,6 @@ public class StationaryPlayer : MonoBehaviour
                         if (effect.OnMiss())
                         {
                             forgiven = true;
-                            Debug.Log("[OopsieShield] Miss was forgiven.");
                             break;
                         }
                     }
@@ -88,7 +84,6 @@ public class StationaryPlayer : MonoBehaviour
                         }
 
                         GameManager.Instance.ResetCombo();
-                        Debug.Log("Missed, reset combo.");
                     }
 
                     return;
@@ -119,7 +114,6 @@ public class StationaryPlayer : MonoBehaviour
                 }
 
                 GameManager.Instance.ResetCombo();
-                Debug.Log("Missed everything.");
             }
         }
     }

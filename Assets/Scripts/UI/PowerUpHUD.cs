@@ -25,7 +25,27 @@ public class PowerUpHUD : MonoBehaviour
 
   public void RefreshDisplay()
   {
-    if (PowerUpManager.Instance == null) return;
+    Debug.Log("[PowerUpHUD] RefreshDisplay called");
+
+    if (PowerUpManager.Instance == null)
+    {
+      Debug.LogError("[PowerUpHUD] PowerUpManager.Instance is null!");
+      return;
+    }
+
+    Debug.Log($"[PowerUpHUD] Found {PowerUpManager.Instance.acquiredPowerUps.Count} acquired power-ups");
+
+    if (powerUpContainer == null)
+    {
+      Debug.LogError("[PowerUpHUD] powerUpContainer is null! Assign it in the inspector.");
+      return;
+    }
+
+    if (powerUpIconPrefab == null)
+    {
+      Debug.LogError("[PowerUpHUD] powerUpIconPrefab is null! Assign it in the inspector.");
+      return;
+    }
 
     // Clear old icons
     ClearOldIcons();
@@ -34,11 +54,12 @@ public class PowerUpHUD : MonoBehaviour
     var acquiredPowerUps = PowerUpManager.Instance.acquiredPowerUps;
     foreach (var powerUp in acquiredPowerUps.Take(maxDisplayedPowerUps))
     {
+      Debug.Log($"[PowerUpHUD] Processing power-up: {powerUp.powerUpName}, Icon: {(powerUp.icon != null ? powerUp.icon.name : "NULL")}");
       CreateOrUpdateIcon(powerUp);
     }
 
-    // Arrange icons
-    ArrangeIcons();
+    // Layout Group will automatically arrange icons vertically
+    Debug.Log($"[PowerUpHUD] RefreshDisplay complete. Active icons: {activeIcons.Count}");
   }
 
   private void ClearOldIcons()
@@ -62,53 +83,49 @@ public class PowerUpHUD : MonoBehaviour
 
   private void CreateOrUpdateIcon(PowerUpData powerUp)
   {
-    if (powerUpIconPrefab == null || powerUpContainer == null) return;
+    Debug.Log($"[PowerUpHUD] CreateOrUpdateIcon called for {powerUp.powerUpName}");
+
+    if (powerUpIconPrefab == null || powerUpContainer == null)
+    {
+      Debug.LogError($"[PowerUpHUD] Missing references! Prefab: {powerUpIconPrefab != null}, Container: {powerUpContainer != null}");
+      return;
+    }
 
     PowerUpHUDIcon icon;
 
     // Create new icon or update existing one
     if (activeIcons.ContainsKey(powerUp.effectType))
     {
+      Debug.Log($"[PowerUpHUD] Updating existing icon for {powerUp.effectType}");
       icon = activeIcons[powerUp.effectType];
       icon.UpdateDisplay(powerUp);
     }
     else
     {
+      Debug.Log($"[PowerUpHUD] Creating new icon GameObject for {powerUp.effectType}");
       // Create new icon
       GameObject iconObj = Instantiate(powerUpIconPrefab, powerUpContainer);
+      Debug.Log($"[PowerUpHUD] Icon GameObject created: {iconObj.name}");
+
       icon = iconObj.GetComponent<PowerUpHUDIcon>();
 
       if (icon == null)
       {
+        Debug.Log("[PowerUpHUD] PowerUpHUDIcon component not found, adding it");
         icon = iconObj.AddComponent<PowerUpHUDIcon>();
       }
 
+      Debug.Log($"[PowerUpHUD] Setting up icon with size {iconSize}");
       icon.Setup(powerUp, iconSize);
       activeIcons[powerUp.effectType] = icon;
-    }
-  }
-
-  private void ArrangeIcons()
-  {
-    int index = 0;
-    foreach (var icon in activeIcons.Values)
-    {
-      if (icon != null)
-      {
-        Vector3 position = new Vector3(
-            index * (iconSize.x + iconSpacing),
-            0,
-            0
-        );
-        icon.transform.localPosition = position;
-        index++;
-      }
+      Debug.Log($"[PowerUpHUD] Icon successfully added to activeIcons dictionary");
     }
   }
 
   // Call this when power-ups are acquired/upgraded
   public void OnPowerUpChanged()
   {
+    Debug.Log("[PowerUpHUD] OnPowerUpChanged called");
     RefreshDisplay();
   }
 }
@@ -118,32 +135,25 @@ public class PowerUpHUDIcon : MonoBehaviour
 {
   [Header("Icon Components")]
   public Image iconImage;
-  public TextMeshProUGUI levelText;
-  public Image backgroundImage;
-
-  [Header("Level Colors")]
-  public Color level1Color = Color.white;
-  public Color level2Color = Color.yellow;
-  public Color level3Color = Color.magenta;
 
   private PowerUpData powerUpData;
 
   public void Setup(PowerUpData data, Vector2 size)
   {
+    Debug.Log($"[PowerUpHUDIcon] Setup called for {data.powerUpName}, size: {size}");
     powerUpData = data;
 
     // Get or create components
     SetupComponents();
 
-    // Set size
-    RectTransform rectTransform = GetComponent<RectTransform>();
-    if (rectTransform != null)
-    {
-      rectTransform.sizeDelta = size;
-    }
+    // Note: Don't set RectTransform properties here as Layout Groups will control them
+    // The LayoutElement component (added in CreateOrUpdateIcon) will handle sizing
+
+    Debug.Log($"[PowerUpHUDIcon] Components setup complete, letting Layout Group handle positioning");
 
     // Update display
     UpdateDisplay(data);
+    Debug.Log($"[PowerUpHUDIcon] Setup complete for {data.powerUpName}");
   }
 
   private void SetupComponents()
@@ -157,92 +167,25 @@ public class PowerUpHUDIcon : MonoBehaviour
         iconImage = gameObject.AddComponent<Image>();
       }
     }
-
-    // Get or create background image
-    if (backgroundImage == null)
-    {
-      GameObject bgObj = new GameObject("Background");
-      bgObj.transform.SetParent(transform, false);
-      backgroundImage = bgObj.AddComponent<Image>();
-      backgroundImage.color = new Color(0, 0, 0, 0.3f); // Semi-transparent background
-
-      // Set background to fill parent
-      RectTransform bgRect = backgroundImage.GetComponent<RectTransform>();
-      bgRect.anchorMin = Vector2.zero;
-      bgRect.anchorMax = Vector2.one;
-      bgRect.offsetMin = Vector2.zero;
-      bgRect.offsetMax = Vector2.zero;
-
-      // Move icon to front
-      iconImage.transform.SetAsLastSibling();
-    }
-
-    // Get or create level text
-    if (levelText == null)
-    {
-      GameObject textObj = new GameObject("LevelText");
-      textObj.transform.SetParent(transform, false);
-      levelText = textObj.AddComponent<TextMeshProUGUI>();
-
-      // Position at bottom-right corner
-      RectTransform textRect = levelText.GetComponent<RectTransform>();
-      textRect.anchorMin = new Vector2(0.7f, 0f);
-      textRect.anchorMax = new Vector2(1f, 0.3f);
-      textRect.offsetMin = Vector2.zero;
-      textRect.offsetMax = Vector2.zero;
-
-      // Style the text
-      levelText.text = "";
-      levelText.fontSize = 12f;
-      levelText.fontStyle = FontStyles.Bold;
-      levelText.alignment = TextAlignmentOptions.Center;
-      levelText.color = Color.white;
-    }
   }
 
   public void UpdateDisplay(PowerUpData data)
   {
+    Debug.Log($"[PowerUpHUDIcon] UpdateDisplay called for {data.powerUpName}");
     powerUpData = data;
 
     // Update icon
     if (iconImage != null && data.icon != null)
     {
       iconImage.sprite = data.icon;
-      iconImage.color = GetLevelColor(data.level);
+      iconImage.color = Color.white; // Keep icon at normal white color
+      Debug.Log($"[PowerUpHUDIcon] Icon sprite set to {data.icon.name}");
+    }
+    else
+    {
+      Debug.LogWarning($"[PowerUpHUDIcon] Missing icon image or sprite! IconImage: {iconImage != null}, Sprite: {data.icon != null}");
     }
 
-    // Update level text
-    if (levelText != null)
-    {
-      if (data.level > 1)
-      {
-        levelText.text = data.level == 3 ? "MAX" : data.level.ToString();
-        levelText.color = GetLevelColor(data.level);
-        levelText.gameObject.SetActive(true);
-      }
-      else
-      {
-        levelText.gameObject.SetActive(false);
-      }
-    }
-
-    // Update background color
-    if (backgroundImage != null)
-    {
-      Color bgColor = GetLevelColor(data.level);
-      bgColor.a = 0.3f; // Keep it semi-transparent
-      backgroundImage.color = bgColor;
-    }
-  }
-
-  private Color GetLevelColor(int level)
-  {
-    return level switch
-    {
-      1 => level1Color,
-      2 => level2Color,
-      3 => level3Color,
-      _ => level1Color
-    };
+    Debug.Log($"[PowerUpHUDIcon] UpdateDisplay complete for {data.powerUpName}");
   }
 }

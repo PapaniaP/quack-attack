@@ -31,7 +31,7 @@ public class PowerUpData : ScriptableObject
 
   // public PowerUpType type;
   public bool upgradeable;
-  public int level;
+  public int level = 1; // Default to level 1
 
   public PowerUpEffectType effectType; // ← Used in PowerUpManager to create effect logic at runtime
 }

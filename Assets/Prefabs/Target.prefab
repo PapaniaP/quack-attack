@@ -141,8 +141,16 @@ MonoBehaviour:
   moveSpeed: 3
   lifetime: 5
   colorChangeThreshold: 1.5
+  earlyGameMinTime: 5
+  earlyGameMaxTime: 10
+  lateGameMinTime: 3
+  lateGameMaxTime: 5
+  bounceRandomization: 0.3
+  earlyGameSpeedMultiplier: 0.7
+  lateGameSpeedMultiplier: 1.5
   pulseMinScale: 0.999
   pulseMaxScale: 1.001
-  pulseSpeed: 1
-  HitExplosion: {fileID: 9092091760150505607, guid: b79b8d5676746d94b8540a4dd5b40387, type: 3}
+  pulseSpeed: 1.5
+  pulseType: 3
   boundsObject: {fileID: 0}
+  HitExplosion: {fileID: 9092091760150505607, guid: b79b8d5676746d94b8540a4dd5b40387, type: 3}

@@ -96,7 +96,8 @@ public class CameraShake : MonoBehaviour // <--- Class name is now CameraShake
             transform.localPosition = initialLocalPosition + randomOffset;
 
             // Increase elapsed time and gradually reduce magnitude (damping)
-            elapsed += Time.deltaTime;
+            // Use unscaledDeltaTime so shake works even when game is paused
+            elapsed += Time.unscaledDeltaTime;
 
             yield return null; // Wait for the next frame
         }
