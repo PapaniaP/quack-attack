@@ -174,9 +174,22 @@ public class GameManager : MonoBehaviour
     public void ResetCombo()
     {
         combo = 0;
-        lastPointsEarned = 0; // Reset points display when combo resets
-        // comboTimer = 0f;
+        // Don't immediately reset lastPointsEarned here - let the UI animation play first
+        // It will be reset after the animation completes or by the next hit
         Debug.Log("[GameManager] Combo reset");
+    }
+
+    // Miss penalty method
+    public void ApplyMissPenalty()
+    {
+        int penalty = 80;
+        score = Mathf.Max(0, score - penalty); // Don't let score go negative
+        lastPointsEarned = -penalty; // Show negative points in combo display
+
+        if (scoreText != null)
+            scoreText.text = "Score: " + score;
+
+        Debug.Log($"[GameManager] Miss penalty applied: -{penalty} points. Score: {score}");
     }
 
     // Score methods
@@ -211,7 +224,7 @@ public class GameManager : MonoBehaviour
         int comboMultiplier = Mathf.Max(1, combo);
         int pointsEarned = basePoints * comboMultiplier;
 
-        // Store for combo display
+        // Store for combo display (positive points)
         lastPointsEarned = pointsEarned;
 
         // Add to total score
@@ -315,6 +328,12 @@ public class GameManager : MonoBehaviour
         SetGameState(GameState.Pause);
         Time.timeScale = 0f;
 
+        // Pause music
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PauseMusic();
+        }
+
         // Update start screen for pause state
         if (startScreen != null)
         {
@@ -330,6 +349,12 @@ public class GameManager : MonoBehaviour
 
         SetGameState(GameState.Play);
         Time.timeScale = 1f;
+
+        // Resume music
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.ResumeMusic();
+        }
 
         if (startScreen != null)
         {
@@ -374,8 +399,16 @@ public class GameManager : MonoBehaviour
             PowerUpManager.Instance.ResetPowerUps();
         }
 
-        SetGameState(GameState.Play);
+        // Reset and spawn new targets
+        if (spawnManager != null)
+        {
+            spawnManager.ResetAndSpawn();
+        }
 
+        SetGameState(GameState.Play);
+        Time.timeScale = 1f; // Ensure game time is resumed
+
+        // Update UI
         if (scoreText != null)
             scoreText.text = "Score: 0";
         if (highScoreText != null)
@@ -384,6 +417,8 @@ public class GameManager : MonoBehaviour
             timerText.text = $"Time: {Mathf.CeilToInt(runDuration)}s";
 
         InitializeHearts();  // Reset hearts display
+
+        Debug.Log("[GameManager] Game restarted (full reset)");
     }
 
     public void RestartGameKeepHighScore()
@@ -406,7 +441,14 @@ public class GameManager : MonoBehaviour
             PowerUpManager.Instance.ResetPowerUps();
         }
 
+        // Reset and spawn new targets
+        if (spawnManager != null)
+        {
+            spawnManager.ResetAndSpawn();
+        }
+
         SetGameState(GameState.Play);
+        Time.timeScale = 1f; // Ensure game time is resumed
 
         // Restore high score
         highScore = savedHighScore;
@@ -420,12 +462,21 @@ public class GameManager : MonoBehaviour
             timerText.text = $"Time: {Mathf.CeilToInt(runDuration)}s";
 
         InitializeHearts();  // Reset hearts display
+
+        Debug.Log("[GameManager] Game restarted (high score preserved)");
     }
 
     public void ExitGame()
     {
         Debug.Log("Exiting game...");
-        Application.Quit();
+
+#if UNITY_EDITOR
+        // Stop playing the game in the Unity Editor
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+            // Quit the application in a built game
+            Application.Quit();
+#endif
     }
 
     private void CheckLevelUp()

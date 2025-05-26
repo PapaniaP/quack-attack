@@ -18,7 +18,7 @@ public class CarnivalQuakeEffect : IAcquisitionEffect
     if (VisualEffectsManager.Instance != null)
     {
       VisualEffectsManager.Instance.ScreenFlash();
-      VisualEffectsManager.Instance.ScreenTintFadeOut(10f);
+      VisualEffectsManager.Instance.ScreenTintFadeOut(2f);
       VisualEffectsManager.Instance.CameraShake(1.0f, 0.3f); // optional
     }
 
