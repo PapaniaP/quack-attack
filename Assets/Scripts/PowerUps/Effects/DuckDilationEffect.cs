@@ -26,10 +26,10 @@ public class DuckDilationEffect : ITargetSpawnedEffect
     {
       target.ApplySlow(slowFactor);
 
-      if (level == 3)
-      {
-        target.EnableGlitterTrail(); // Optional visual effect
-      }
+      // if (level == 3)
+      // {
+      //   target.EnableGlitterTrail(); // Optional visual effect
+      // }
 
       Debug.Log($"🌀 Duck Dilation: Slowed down {target.name}");
     }
