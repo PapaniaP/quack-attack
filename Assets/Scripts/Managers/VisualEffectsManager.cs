@@ -7,7 +7,7 @@ public class VisualEffectsManager : MonoBehaviour
 
     [Header("Screen Tint Overlay")]
     public Image screenOverlay; // Assign a fullscreen UI Image in the Inspector
-    public Color quakeTintColor = new Color(1f, 0.3f, 0.9f, 0.7f); // carnival purple-pink
+    public Color quakeTintColor = new Color(1f, 1f, 1f, 0.7f); // whitish color
     private Coroutine tintRoutine;
 
     [Header("Camera Shake")]
