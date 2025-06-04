@@ -214,7 +214,7 @@ public class GameManager : MonoBehaviour
 
         Debug.Log($"[GameManager] Score: {score}, High Score: {highScore}");
 
-        CheckLevelUp();  // 🚨 NEW LINE
+        CheckLevelUp();
     }
 
     // New method: Add points with combo multiplier
@@ -230,7 +230,6 @@ public class GameManager : MonoBehaviour
         // Add to total score
         AddPoints(pointsEarned);
 
-        Debug.Log($"[GameManager] Base: {basePoints}, Combo: {combo}x, Earned: {pointsEarned}");
     }
 
     // Game state methods
@@ -542,6 +541,12 @@ public class GameManager : MonoBehaviour
         if (currentLives <= 0)
         {
             EndGame(success: false);
+        }
+
+        // Trigger damage effect
+        if (VisualEffectsManager.Instance != null)
+        {
+            VisualEffectsManager.Instance.PlayDamageEffect();
         }
     }
 

@@ -9,6 +9,7 @@ public class AudioManager : MonoBehaviour
     public AudioClip backgroundMusic;
     public AudioClip shootSFX;
     public AudioClip missSFX;
+    public AudioClip damageOwOuchSFX;  // "Ow!"/"Ouch!" sound when player takes damage
 
     void Awake()
     {
@@ -33,6 +34,14 @@ public class AudioManager : MonoBehaviour
         if (missSFX != null)
         {
             sfxSource.PlayOneShot(missSFX);
+        }
+    }
+
+    public void PlayDamageSFX()
+    {
+        if (damageOwOuchSFX != null)
+        {
+            sfxSource.PlayOneShot(damageOwOuchSFX);
         }
     }
 

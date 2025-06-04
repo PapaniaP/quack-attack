@@ -38,7 +38,12 @@ public class Target : MonoBehaviour
     // private CameraShake cameraShaker;
 
     [Header("Hit Effect")]
-    public GameObject HitExplosion; // Public variable to hold your smoke prefab
+    [SerializeField] private GameObject hitEffectPrefab;
+    [SerializeField] private Transform hitEffectSpawnPoint;
+
+    [Header("Death Effect")]
+    [SerializeField] private GameObject deathEffectPrefab;
+    [SerializeField] private Transform deathEffectSpawnPoint;
 
     void Start()
     {
@@ -175,46 +180,100 @@ public class Target : MonoBehaviour
 
     void UpdateVisualFeedback(float timeLeft)
     {
-        // Color change as time runs out
+        // Calculate urgency level based on time remaining
+        float urgencyProgress = 1f - (timeLeft / colorChangeThreshold);
+        urgencyProgress = Mathf.Clamp01(urgencyProgress);
+
         if (timeLeft < colorChangeThreshold)
         {
-            float t = 1f - (timeLeft / colorChangeThreshold);
+            // Outline/Glow color progression: Green → Yellow → Orange → Red → Flashing White
+            Color outlineColor;
+            float glowIntensity;
 
-            // More dramatic color shift (yellow -> orange -> red)
-            Color warningColor;
-            if (t < 0.5f)
-                warningColor = Color.Lerp(originalColor, Color.yellow, t * 2);
-            else
-                warningColor = Color.Lerp(Color.yellow, Color.red, (t - 0.5f) * 2);
+            if (urgencyProgress < 0.25f) // Green phase (75-100% time left in warning period)
+            {
+                float t = urgencyProgress * 4f;
+                outlineColor = Color.Lerp(Color.green, Color.yellow, t);
+                glowIntensity = Mathf.Lerp(0.5f, 1f, t);
+            }
+            else if (urgencyProgress < 0.5f) // Yellow phase (50-75% time left in warning period)
+            {
+                float t = (urgencyProgress - 0.25f) * 4f;
+                outlineColor = Color.Lerp(Color.yellow, new Color(1f, 0.5f, 0f), t); // Orange
+                glowIntensity = Mathf.Lerp(1f, 1.5f, t);
+            }
+            else if (urgencyProgress < 0.8f) // Orange phase (20-50% time left in warning period)
+            {
+                float t = (urgencyProgress - 0.5f) * 3.33f;
+                outlineColor = Color.Lerp(new Color(1f, 0.5f, 0f), Color.red, t);
+                glowIntensity = Mathf.Lerp(1.5f, 2f, t);
+            }
+            else // Red/Critical phase (0-20% time left in warning period)
+            {
+                float t = (urgencyProgress - 0.8f) * 5f;
 
-            rend.material.color = warningColor;
+                // Flashing white effect in final moments
+                if (urgencyProgress > 0.9f)
+                {
+                    float flashSpeed = 15f;
+                    float flashValue = (Mathf.Sin(Time.time * flashSpeed) + 1f) * 0.5f;
+                    outlineColor = Color.Lerp(Color.red, Color.white, flashValue * 0.8f);
+                    glowIntensity = Mathf.Lerp(2f, 4f, flashValue);
+                }
+                else
+                {
+                    outlineColor = Color.red;
+                    glowIntensity = Mathf.Lerp(2f, 3f, t);
+                }
+            }
 
-            // Pulsing effect that intensifies as time runs out
-            float pulseIntensity = Mathf.Lerp(0.1f, 0.5f, t); // More intense pulsing as t approaches 1
-            float pulseFactor = Mathf.Lerp(
-                1 - (pulseMinScale * pulseIntensity),
-                1 + (pulseMaxScale * pulseIntensity),
-                (Mathf.Sin(Time.time * pulseSpeed * (1 + t)) + 1) / 2
-            );
-
-            transform.localScale = originalScale * pulseFactor;
-
-            // Optionally, could add emission intensity increase here if material supports it
+            // Apply the outline/glow effect using emission
             if (rend.material.HasProperty("_EmissionColor"))
             {
-                Color emissionColor = warningColor * t * 2;
+                Color emissionColor = outlineColor * glowIntensity;
                 rend.material.SetColor("_EmissionColor", emissionColor);
+                rend.material.EnableKeyword("_EMISSION");
+            }
+
+            // Subtle color tint on the main material (much more subtle than before)
+            Color baseTint = Color.Lerp(originalColor, outlineColor, 0.2f);
+            rend.material.color = baseTint;
+
+            // Pulse effect with clear phases
+            if (urgencyProgress > 0.4f)
+            {
+                float acceleratedSpeed;
+
+                if (urgencyProgress <= 0.7f) // 40-70% urgency: Moderate pulse
+                {
+                    float t = (urgencyProgress - 0.4f) / 0.3f; // 0 to 1 across 40-70% range
+                    acceleratedSpeed = pulseSpeed * Mathf.Lerp(1.5f, 2.5f, t);
+                }
+                else // 70-100% urgency: Fast pulse
+                {
+                    float t = (urgencyProgress - 0.7f) / 0.3f; // 0 to 1 across 70-100% range
+                    acceleratedSpeed = pulseSpeed * Mathf.Lerp(2.5f, 4f, t);
+                }
+
+                float pulse = (Mathf.Sin(Time.time * acceleratedSpeed) + 1f) * 0.5f;
+                float scaleMultiplier = Mathf.Lerp(pulseMinScale, pulseMaxScale, pulse);
+                transform.localScale = originalScale * scaleMultiplier;
+            }
+            else
+            {
+                transform.localScale = originalScale;
             }
         }
         else
         {
-            // Reset to original appearance
+            // Reset to original appearance - no outline/glow
             rend.material.color = originalColor;
             transform.localScale = originalScale;
 
             if (rend.material.HasProperty("_EmissionColor"))
             {
                 rend.material.SetColor("_EmissionColor", Color.black);
+                rend.material.DisableKeyword("_EMISSION");
             }
         }
     }
@@ -227,20 +286,11 @@ public class Target : MonoBehaviour
         // Use new method that applies combo multiplier to the hit zone points
         GameManager.Instance.AddPointsWithCombo(hitZonePoints);
 
-        // Trigger camera shake using the Singleton instance
-        if (CameraShake.Instance != null) // Accessing the Singleton instance
-        {
-            CameraShake.Instance.StartShake(); // Calling the correct method name
-        }
-        else
-        {
-            Debug.LogWarning("CameraShake.Instance is null. Cannot shake camera. Make sure CameraShake script is on Main Camera and correctly set up as a Singleton.");
-        }
 
         // Instantiate the hit explosion prefab
-        if (HitExplosion != null)
+        if (hitEffectPrefab != null && hitEffectSpawnPoint != null)
         {
-            Instantiate(HitExplosion, transform.position, transform.rotation);
+            Instantiate(hitEffectPrefab, hitEffectSpawnPoint.position, Quaternion.identity);
         }
 
         foreach (var effect in PowerUpManager.Instance.deathEffects)
@@ -279,6 +329,12 @@ public class Target : MonoBehaviour
         if (spawnManager != null)
         {
             spawnManager.OnTargetDestroyed();
+        }
+
+        // Instantiate the death explosion prefab
+        if (deathEffectPrefab != null && deathEffectSpawnPoint != null)
+        {
+            VisualEffectsManager.Instance.PlayEffect(deathEffectPrefab, deathEffectSpawnPoint.position);
         }
 
         Destroy(gameObject);

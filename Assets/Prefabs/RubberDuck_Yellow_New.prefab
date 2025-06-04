@@ -231,6 +231,7 @@ Transform:
   - {fileID: 86191168565917787}
   - {fileID: 5971066478994390201}
   - {fileID: 8734538823811327140}
+  - {fileID: 4394232128189155710}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &5465894273016040405
@@ -274,12 +275,17 @@ MonoBehaviour:
   earlyGameMaxTime: 10
   lateGameMinTime: 3
   lateGameMaxTime: 5
-  pulseMinScale: 0.999
-  pulseMaxScale: 1.001
-  pulseSpeed: 1
-  pulseType: 0
+  bounceRandomization: 0.3
+  earlyGameSpeedMultiplier: 0.7
+  lateGameSpeedMultiplier: 1.5
+  pulseMinScale: 0.8
+  pulseMaxScale: 1.2
+  pulseSpeed: 1.5
   boundsObject: {fileID: 0}
-  HitExplosion: {fileID: 9092091760150505607, guid: b79b8d5676746d94b8540a4dd5b40387, type: 3}
+  hitEffectPrefab: {fileID: 1429954232896169633, guid: 83036083a4ebcd34f98131bd3cf6f4d2, type: 3}
+  hitEffectSpawnPoint: {fileID: 4394232128189155710}
+  deathEffectPrefab: {fileID: 8194992990867289339, guid: 99bc28c0d45f51c4fbac01080b73edc7, type: 3}
+  deathEffectSpawnPoint: {fileID: 4394232128189155710}
 --- !u!1 &6249795595363920738
 GameObject:
   m_ObjectHideFlags: 0
@@ -477,3 +483,34 @@ Transform:
   - {fileID: 7821832159070337607}
   m_Father: {fileID: 8309894499915622431}
   m_LocalEulerAnglesHint: {x: 0.21, y: 0, z: 0}
+--- !u!1 &7813467223333703114
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4394232128189155710}
+  m_Layer: 2
+  m_Name: HitEffectSpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4394232128189155710
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7813467223333703114}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.081, y: 0.277, z: 0.16}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8309894499915622431}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
