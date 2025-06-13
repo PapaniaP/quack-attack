@@ -45,7 +45,7 @@ public class ComboExplosionEffect : IComboEffect
 
   private void TriggerExplosion(Vector3 position)
   {
-    VisualEffectsManager.Instance?.TriggerAOE(position);
+    VisualEffectsManager.Instance?.TriggerComboExplosion(position, level == 3 ? 8f : 5f);
     Debug.Log("[ComboExplosionEffect] 💥 Triggering AoE explosion!");
 
     // 🧨 Damage logic

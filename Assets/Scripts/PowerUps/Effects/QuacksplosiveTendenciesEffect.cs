@@ -32,8 +32,8 @@ public class QuacksplosiveTendenciesEffect : ITargetDeathEffect
     {
       Debug.Log($"💣 Quacksplosion at {position} (radius {radius})");
 
-      // Optional: Visual effect
-      VisualEffectsManager.Instance?.TriggerAOE(position, radius);
+      // Use specific quacksplosion effect
+      VisualEffectsManager.Instance?.TriggerQuacksplosion(position, radius);
 
       // Find and damage nearby ducks
       Collider[] hits = Physics.OverlapSphere(position, radius);

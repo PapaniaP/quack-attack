@@ -3,6 +3,13 @@ using UnityEngine.UI;
 using System.Collections;
 using CartoonFX;  // Add CFXR namespace
 
+public enum AoEType
+{
+    General,        // General/fallback AoE effects
+    Combo,          // Combo explosion effects
+    Quacksplosive   // Quacksplosive Tendencies effect
+}
+
 public class VisualEffectsManager : MonoBehaviour
 {
     public static VisualEffectsManager Instance;
@@ -14,10 +21,10 @@ public class VisualEffectsManager : MonoBehaviour
 
     [Header("Damage Effect")]
     public Q_Vignette_Split damageVignette;  // Reference to the Q_Vignette component
-    public float damageEffectDuration = 0.8f;
+    public float damageEffectDuration = 0.5f;  // Reduced from 0.8f for snappier effect
     public Color damageColor = new Color(1f, 0f, 0f, 1f);  // Red with FULL opacity
     public float minVignetteScale = 0.8f;  // Starting scale (subtle but visible)
-    public float maxVignetteScale = 1.5f;  // Maximum dramatic scale
+    public float maxVignetteScale = 2.0f;  // Increased from 1.5f for more dramatic scale
     private Color originalMainColor;
     private Color originalSkyColor;
     private float originalMainScale;
@@ -25,6 +32,12 @@ public class VisualEffectsManager : MonoBehaviour
 
     [Header("Camera Shake (CFXR)")]
     public CFXR_Effect.CameraShake cameraShake = new CFXR_Effect.CameraShake();
+
+    [Header("AoE Explosion Prefabs")]
+    [SerializeField] private GameObject generalAoEPrefab;           // For general/fallback AoE effects
+    [SerializeField] private GameObject comboExplosionPrefab;       // For combo explosions (bigger/flashier)
+    [SerializeField] private GameObject quacksplosiveExplosionPrefab; // For Quacksplosive Tendencies effect
+    [SerializeField] private float explosionLifetime = 3f;         // How long explosions stay in scene
 
     private void Awake()
     {
@@ -121,18 +134,69 @@ public class VisualEffectsManager : MonoBehaviour
         cameraShake.StopShake();
     }
 
-    // 👇 EXISTING AOE MARKER FUNCTION (unchanged)
+    // 👇 NEW PREFAB-BASED AOE SYSTEM
+    public void TriggerAOE(Vector3 position, float radius = 1f, AoEType explosionType = AoEType.General)
+    {
+        Debug.Log($"[VFX] Triggering {explosionType} AoE at {position} with radius {radius}");
+
+        GameObject prefabToSpawn = GetExplosionPrefab(explosionType);
+
+        if (prefabToSpawn == null)
+        {
+            Debug.LogWarning($"[VFX] No prefab assigned for explosion type: {explosionType}. Using fallback.");
+            CreateFallbackExplosion(position, radius);
+            return;
+        }
+
+        // Instantiate the explosion prefab
+        GameObject explosion = Instantiate(prefabToSpawn, position, Quaternion.identity);
+
+        // Scale the explosion based on radius
+        float scale = Mathf.Max(0.5f, radius / 2f); // Minimum scale of 0.5x, scale roughly based on radius
+        explosion.transform.localScale = Vector3.one * scale;
+
+        // Auto-destroy after lifetime (if it doesn't destroy itself)
+        if (explosionLifetime > 0)
+        {
+            Destroy(explosion, explosionLifetime);
+        }
+    }
+
+    // Overloaded method for backward compatibility (no explosion type specified)
     public void TriggerAOE(Vector3 position, float radius = 1f)
     {
-        Debug.Log($"[VFX] Triggering AoE at {position} with radius {radius}");
+        TriggerAOE(position, radius, AoEType.General);
+    }
 
+    // Method for specific explosion types
+    public void TriggerComboExplosion(Vector3 position, float radius = 5f)
+    {
+        TriggerAOE(position, radius, AoEType.Combo);
+    }
+
+    public void TriggerQuacksplosion(Vector3 position, float radius = 2f)
+    {
+        TriggerAOE(position, radius, AoEType.Quacksplosive);
+    }
+
+    private GameObject GetExplosionPrefab(AoEType explosionType)
+    {
+        return explosionType switch
+        {
+            AoEType.Combo => comboExplosionPrefab ?? generalAoEPrefab,
+            AoEType.Quacksplosive => quacksplosiveExplosionPrefab ?? generalAoEPrefab,
+            AoEType.General => generalAoEPrefab,
+            _ => generalAoEPrefab
+        };
+    }
+
+    // Fallback for when no prefab is assigned (keeps old sphere behavior)
+    private void CreateFallbackExplosion(Vector3 position, float radius)
+    {
         GameObject marker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         marker.transform.position = position;
-
-        // Scale the sphere to reflect the AoE radius (diameter = radius * 2)
         marker.transform.localScale = Vector3.one * radius * 2f;
 
-        // Optional: Change color or make it transparent
         Renderer rend = marker.GetComponent<Renderer>();
         if (rend != null)
         {
@@ -180,50 +244,54 @@ public class VisualEffectsManager : MonoBehaviour
 
         float elapsedTime = 0f;
 
-        // Phase 1: Quick flash in (20% of total time)
-        float flashInTime = damageEffectDuration * 0.2f;
+        // Phase 1: HARSH flash in (10% of total time - much faster!)
+        float flashInTime = damageEffectDuration * 0.1f;
 
         while (elapsedTime < flashInTime)
         {
+            // Use easing for more dramatic flash-in effect
             float t = elapsedTime / flashInTime;
+            float easedT = 1f - Mathf.Pow(1f - t, 3f); // Ease out cubic for sharp start
 
             // Animate color (fade in the red)
-            Color currentMainColor = Color.Lerp(invisibleMainColor, damageColor, t);
+            Color currentMainColor = Color.Lerp(invisibleMainColor, damageColor, easedT);
             damageVignette.mainColor = currentMainColor;
-            Color currentSkyColor = Color.Lerp(invisibleSkyColor, damageColor, t);
+            Color currentSkyColor = Color.Lerp(invisibleSkyColor, damageColor, easedT);
             damageVignette.skyColor = currentSkyColor;
 
             // Animate scale (grow the vignette dramatically)
-            float currentMainScale = Mathf.Lerp(0f, maxVignetteScale, t);
+            float currentMainScale = Mathf.Lerp(0f, maxVignetteScale, easedT);
             damageVignette.mainScale = currentMainScale;
-            float currentSkyScale = Mathf.Lerp(0f, maxVignetteScale, t);
+            float currentSkyScale = Mathf.Lerp(0f, maxVignetteScale, easedT);
             damageVignette.skyScale = currentSkyScale;
 
             elapsedTime += Time.unscaledDeltaTime; // Use unscaled time in case game is paused
             yield return null;
         }
 
-        // Phase 2: Brief hold (10% of total time)
-        yield return new WaitForSecondsRealtime(damageEffectDuration * 0.1f);
+        // Phase 2: Very brief hold (5% of total time - minimal hold for harsh effect)
+        yield return new WaitForSecondsRealtime(damageEffectDuration * 0.05f);
 
-        // Phase 3: Smooth fade out (70% of total time)
-        float fadeOutTime = damageEffectDuration * 0.7f;
+        // Phase 3: Fast fade out (85% of total time)
+        float fadeOutTime = damageEffectDuration * 0.85f;
         elapsedTime = 0f;
 
         while (elapsedTime < fadeOutTime)
         {
             float t = elapsedTime / fadeOutTime;
+            // Use ease-in for sharper fade-out
+            float easedT = Mathf.Pow(t, 2f); // Ease in quadratic for sharp end
 
             // Animate color (fade out the red)
-            Color currentMainColor = Color.Lerp(damageColor, invisibleMainColor, t);
+            Color currentMainColor = Color.Lerp(damageColor, invisibleMainColor, easedT);
             damageVignette.mainColor = currentMainColor;
-            Color currentSkyColor = Color.Lerp(damageColor, invisibleSkyColor, t);
+            Color currentSkyColor = Color.Lerp(damageColor, invisibleSkyColor, easedT);
             damageVignette.skyColor = currentSkyColor;
 
             // Animate scale (shrink back to invisible)
-            float currentMainScale = Mathf.Lerp(maxVignetteScale, 0f, t);
+            float currentMainScale = Mathf.Lerp(maxVignetteScale, 0f, easedT);
             damageVignette.mainScale = currentMainScale;
-            float currentSkyScale = Mathf.Lerp(maxVignetteScale, 0f, t);
+            float currentSkyScale = Mathf.Lerp(maxVignetteScale, 0f, easedT);
             damageVignette.skyScale = currentSkyScale;
 
             elapsedTime += Time.unscaledDeltaTime;

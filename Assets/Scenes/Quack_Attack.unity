@@ -453,7 +453,7 @@ Animation:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 78034468}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 4
   m_Animation: {fileID: 7400000, guid: b271ef342347fba49a7e4615569d5606, type: 2}
   m_Animations:
@@ -463,6 +463,17 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
+--- !u!114 &78034471 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8844125871819146759, guid: 2f47ff0375cc34e498401060c697ccda, type: 3}
+  m_PrefabInstance: {fileID: 2003507591}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 78034468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4880c9be4e2ab6f4699ed66b6fe19a2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &138547235
 GameObject:
   m_ObjectHideFlags: 0
@@ -670,12 +681,49 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   screenOverlay: {fileID: 471631203}
   quakeTintColor: {r: 1, g: 0.3, b: 0.9, a: 0.7}
-  damageVignette: {fileID: 0}
-  damagePopSound: {fileID: 0}
-  sfxSource: {fileID: 0}
-  damageEffectDuration: 0.8
-  damageColor: {r: 1, g: 0, b: 0, a: 0.6}
-  cameraTransform: {fileID: 0}
+  damageVignette: {fileID: 78034471}
+  damageEffectDuration: 1
+  damageColor: {r: 0.5, g: 0.054245293, b: 0.07499339, a: 1}
+  minVignetteScale: 1
+  maxVignetteScale: 2.5
+  cameraShake:
+    enabled: 1
+    useMainCamera: 1
+    cameras:
+    - {fileID: 2008418159}
+    delay: 0
+    duration: 0.5
+    shakeSpace: 0
+    shakeStrength: {x: 0.1, y: 0.1, z: 0.1}
+    shakeCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: -1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: -1
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    shakesDelay: 0
+  generalAoEPrefab: {fileID: 0}
+  comboExplosionPrefab: {fileID: 0}
+  quacksplosiveExplosionPrefab: {fileID: 0}
+  explosionLifetime: 3
 --- !u!4 &186060773
 Transform:
   m_ObjectHideFlags: 0
@@ -4493,6 +4541,7 @@ MonoBehaviour:
   backgroundMusic: {fileID: 8300000, guid: d9dd6b28fb7926b42a46fc2d408ecb75, type: 3}
   shootSFX: {fileID: 8300000, guid: 57d833ad8ae4cb44a917767e794be559, type: 3}
   missSFX: {fileID: 8300000, guid: 99b011e7d93ca464ba4f312695c5cbe4, type: 3}
+  damageOwOuchSFX: {fileID: 8300000, guid: 2fffc91320a3e4d28b77b4c928a5997b, type: 3}
 --- !u!1 &993592814
 GameObject:
   m_ObjectHideFlags: 0
@@ -8008,15 +8057,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8844125871819146759, guid: 2f47ff0375cc34e498401060c697ccda, type: 3}
       propertyPath: skyCornerType
-      value: 0
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 8844125871819146759, guid: 2f47ff0375cc34e498401060c697ccda, type: 3}
       propertyPath: mainCornerType
-      value: 0
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 8844125871819146759, guid: 2f47ff0375cc34e498401060c697ccda, type: 3}
       propertyPath: stretchSkyToScreenRatio
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8844125871819146759, guid: 2f47ff0375cc34e498401060c697ccda, type: 3}
       propertyPath: stretchMainToScreenRatio
